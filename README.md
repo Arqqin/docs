@@ -47,7 +47,7 @@ The official developer portal will provide:
 
 This documentation is maintained by the Arqqin team. For questions, suggestions, or to report issues:
 
-- **Email**: developers@arqqin.com
+- **Email**: hello@arqqin.com
 - **Issues**: Use GitHub Issues for documentation bugs
 - **Feature Requests**: Contact us directly for API feature requests
 
@@ -63,4 +63,4 @@ This documentation is provided by Arqqin for public use. The Arqqin Parking Mana
 
 ---
 
-*Last updated: August 2024*
+*Last updated: August 2025*

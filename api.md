@@ -627,7 +627,7 @@ except Exception as e:
 
 ## Changelog
 
-### Version 1.2.0 (2024-08-07)
+### Version 1.2.0 (2025-08-07)
 - Initial API release
 - Location management
 - Resident and vehicle management
@@ -635,4 +635,4 @@ except Exception as e:
 
 ---
 
-*This document is version 1.2.0 and was last updated on August 07, 2024.*
+*This document is version 1.2.0 and was last updated on August 07, 2025.*
