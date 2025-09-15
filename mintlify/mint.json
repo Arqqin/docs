@@ -74,8 +74,8 @@
     "og:title": "Arqqin Backend API Documentation",
     "og:description": "Complete guide to integrating with the Arqqin platform"
   },
+  "openapi": "openapi.json",
   "api": {
-    "openapi": "openapi.json",
     "baseUrl": "https://apistg.arqq.in/api/",
     "auth": {
       "method": "bearer"
