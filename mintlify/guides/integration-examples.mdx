@@ -1,0 +1,631 @@
+---
+title: "Integration Examples"
+description: "Real-world integration examples and SDKs for the Arqqin Parking Management API"
+---
+
+## JavaScript/Node.js SDK
+
+A complete JavaScript SDK for managing parking whitelists:
+
+<CodeGroup>
+```javascript JavaScript SDK
+class ArqqinParkingAPI {
+  constructor(apiKey, baseURL = 'https://apistg.arqq.in/api') {
+    this.apiKey = apiKey;
+    this.baseURL = baseURL;
+    this.client = axios.create({
+      baseURL,
+      headers: {
+        'X-API-Key': apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+  }
+
+  // List all accessible locations
+  async getLocations() {
+    try {
+      const response = await this.client.get('/locations');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching locations:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Get location details
+  async getLocation(locationId) {
+    try {
+      const response = await this.client.get(`/locations/${locationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching location:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Get location status
+  async getLocationStatus(locationId) {
+    try {
+      const response = await this.client.get(`/locations/${locationId}/status`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching location status:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // List whitelist vehicles with optional filters
+  async listWhitelist(locationId, filters = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (filters.referenceId) params.append('referenceId', filters.referenceId);
+      if (filters.plateType) params.append('plateType', filters.plateType);
+      if (filters.plateCode) params.append('plateCode', filters.plateCode);
+      if (filters.plateNumber) params.append('plateNumber', filters.plateNumber);
+      if (filters.limit) params.append('limit', String(filters.limit));
+
+      const response = await this.client.get(`/locations/${locationId}/whitelist?${params}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error listing whitelist:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Add a vehicle to the whitelist
+  async addWhitelistVehicle(locationId, whitelistEntry) {
+    try {
+      const response = await this.client.post(`/locations/${locationId}/whitelist`, whitelistEntry);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding whitelist vehicle:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Update a whitelist vehicle
+  async updateWhitelistVehicle(locationId, whitelistId, updates) {
+    try {
+      const response = await this.client.put(`/locations/${locationId}/whitelist/${whitelistId}`, updates);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating whitelist vehicle:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Delete a whitelist vehicle
+  async deleteWhitelistVehicle(locationId, whitelistId) {
+    try {
+      const response = await this.client.delete(`/locations/${locationId}/whitelist/${whitelistId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting whitelist vehicle:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Health check
+  async healthCheck() {
+    try {
+      const response = await this.client.get('/health');
+      return response.data;
+    } catch (error) {
+      console.error('Error checking health:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+}
+
+// Usage example
+const api = new ArqqinParkingAPI('your-api-key');
+
+// List whitelist vehicles for a reference
+api.listWhitelist('location_123', { referenceId: 'REF_001' })
+  .then(result => console.log('Whitelist:', result))
+  .catch(error => console.error('Error:', error));
+```
+
+```javascript Node.js Usage
+const ArqqinParkingAPI = require('./arqqin-parking-api');
+
+async function main() {
+  const api = new ArqqinParkingAPI('your-api-key');
+  
+  try {
+    // Test connection
+    const health = await api.healthCheck();
+    console.log('API Health:', health);
+    
+    // Get locations
+    const locations = await api.getLocations();
+    console.log('Available locations:', locations.data);
+    
+    // Add a vehicle
+    const vehicleData = {
+      referenceId: 'RESIDENT_001',
+      plateType: 'DXB',
+      plateCode: 'White',
+      plateNumber: '12345',
+      vehicleType: 'Sedan',
+      note: 'Primary vehicle'
+    };
+    
+    const result = await api.addWhitelistVehicle('location_123', vehicleData);
+    console.log('Vehicle added:', result.data);
+    
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
+
+main();
+```
+</CodeGroup>
+
+## Python SDK
+
+A comprehensive Python SDK for parking management:
+
+<CodeGroup>
+```python Python SDK
+import requests
+from typing import Optional, Dict, Any, List
+
+class ArqqinParkingAPI:
+    def __init__(self, api_key: str, base_url: str = 'https://apistg.arqq.in/api'):
+        self.api_key = api_key
+        self.base_url = base_url
+        self.headers = {
+            'X-API-Key': api_key,
+            'Content-Type': 'application/json'
+        }
+
+    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, params: Optional[Dict] = None) -> Dict[str, Any]:
+        url = f"{self.base_url}{endpoint}"
+        
+        try:
+            if method.upper() == 'GET':
+                response = requests.get(url, headers=self.headers, params=params)
+            elif method.upper() == 'POST':
+                response = requests.post(url, headers=self.headers, json=data)
+            elif method.upper() == 'PUT':
+                response = requests.put(url, headers=self.headers, json=data)
+            elif method.upper() == 'DELETE':
+                response = requests.delete(url, headers=self.headers)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
+
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"API request failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response: {e.response.text}")
+            raise
+
+    def get_locations(self) -> Dict[str, Any]:
+        """Get all accessible locations"""
+        return self._make_request('GET', '/locations')
+
+    def get_location(self, location_id: str) -> Dict[str, Any]:
+        """Get location details"""
+        return self._make_request('GET', f'/locations/{location_id}')
+
+    def get_location_status(self, location_id: str) -> Dict[str, Any]:
+        """Get location status and statistics"""
+        return self._make_request('GET', f'/locations/{location_id}/status')
+
+    def list_whitelist(self, location_id: str, 
+                        reference_id: Optional[str] = None,
+                        plate_type: Optional[str] = None,
+                        plate_code: Optional[str] = None,
+                        plate_number: Optional[str] = None,
+                        limit: Optional[int] = None) -> Dict[str, Any]:
+        """List whitelist vehicles for a location with optional filters"""
+        params = {}
+        if reference_id:
+            params['referenceId'] = reference_id
+        if plate_type:
+            params['plateType'] = plate_type
+        if plate_code:
+            params['plateCode'] = plate_code
+        if plate_number:
+            params['plateNumber'] = plate_number
+        if limit:
+            params['limit'] = limit
+
+        return self._make_request('GET', f'/locations/{location_id}/whitelist', params=params)
+
+    def add_whitelist_vehicle(self, location_id: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+        """Add a vehicle to the whitelist"""
+        return self._make_request('POST', f'/locations/{location_id}/whitelist', data=entry)
+
+    def update_whitelist_vehicle(self, location_id: str, whitelist_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a vehicle in the whitelist"""
+        return self._make_request('PUT', f'/locations/{location_id}/whitelist/{whitelist_id}', data=updates)
+
+    def delete_whitelist_vehicle(self, location_id: str, whitelist_id: str) -> Dict[str, Any]:
+        """Delete a vehicle from the whitelist"""
+        return self._make_request('DELETE', f'/locations/{location_id}/whitelist/{whitelist_id}')
+
+    def health_check(self) -> Dict[str, Any]:
+        """Check API health status"""
+        return self._make_request('GET', '/health')
+
+# Usage example
+api = ArqqinParkingAPI('your-api-key')
+
+try:
+    # Test connection
+    health = api.health_check()
+    print("API Health:", health)
+    
+    # Get locations
+    locations = api.get_locations()
+    print("Available locations:", locations['data'])
+    
+    # List whitelist for a reference
+    result = api.list_whitelist('location_123', reference_id='REF_001')
+    print("Whitelist:", result)
+    
+except Exception as e:
+    print(f"Error: {e}")
+```
+
+```python Django Integration
+from django.conf import settings
+from .arqqin_api import ArqqinParkingAPI
+
+class ParkingService:
+    def __init__(self):
+        self.api = ArqqinParkingAPI(settings.ARQQIN_API_KEY)
+    
+    def add_resident_vehicle(self, resident_id: str, location_id: str, plate_data: dict):
+        """Add a vehicle for a resident"""
+        vehicle_data = {
+            'referenceId': f'RESIDENT_{resident_id}',
+            **plate_data
+        }
+        
+        return self.api.add_whitelist_vehicle(location_id, vehicle_data)
+    
+    def remove_resident_vehicle(self, whitelist_id: str, location_id: str):
+        """Remove a vehicle from whitelist"""
+        return self.api.delete_whitelist_vehicle(location_id, whitelist_id)
+    
+    def get_resident_vehicles(self, resident_id: str, location_id: str):
+        """Get all vehicles for a resident"""
+        return self.api.list_whitelist(
+            location_id, 
+            reference_id=f'RESIDENT_{resident_id}'
+        )
+```
+</CodeGroup>
+
+## cURL Examples
+
+Complete cURL examples for all API endpoints:
+
+<CodeGroup>
+```bash Health Check
+curl -X GET "https://apistg.arqq.in/api/health" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash List Locations
+curl -X GET "https://apistg.arqq.in/api/locations" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash Get Location Details
+curl -X GET "https://apistg.arqq.in/api/locations/location_123" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash Get Location Status
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/status" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash List Whitelist Vehicles
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/whitelist" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash Filter Whitelist by Reference
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/whitelist?referenceId=RESIDENT_001" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash Add Vehicle to Whitelist
+curl -X POST "https://apistg.arqq.in/api/locations/location_123/whitelist" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "RESIDENT_001",
+    "plateType": "DXB",
+    "plateCode": "White",
+    "plateNumber": "12345",
+    "vehicleType": "Sedan",
+    "note": "Primary vehicle for apartment 4B"
+  }'
+```
+
+```bash Update Whitelist Vehicle
+curl -X PUT "https://apistg.arqq.in/api/locations/location_123/whitelist/whitelist_789" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "RESIDENT_001",
+    "plateType": "DXB",
+    "plateCode": "A",
+    "plateNumber": "67890",
+    "vehicleType": "SUV",
+    "note": "Updated vehicle information"
+  }'
+```
+
+```bash Remove Vehicle from Whitelist
+curl -X DELETE "https://apistg.arqq.in/api/locations/location_123/whitelist/whitelist_789" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+</CodeGroup>
+
+## Real-World Integration Examples
+
+### Property Management System Integration
+
+<Accordion title="Resident Portal Integration">
+Integrate with a resident portal to manage parking:
+
+```javascript
+class ResidentParkingManager {
+  constructor(api) {
+    this.api = api;
+    this.locationId = 'your-location-id';
+  }
+  
+  async addResidentVehicle(residentId, plateData) {
+    const vehicleData = {
+      referenceId: `RESIDENT_${residentId}`,
+      ...plateData,
+      note: `Vehicle for resident ${residentId}`
+    };
+    
+    try {
+      const result = await this.api.addWhitelistVehicle(this.locationId, vehicleData);
+      return { success: true, data: result.data };
+    } catch (error) {
+      if (error.response?.status === 409) {
+        return { success: false, error: 'Vehicle already exists' };
+      }
+      throw error;
+    }
+  }
+  
+  async getResidentVehicles(residentId) {
+    return await this.api.listWhitelist(
+      this.locationId, 
+      { referenceId: `RESIDENT_${residentId}` }
+    );
+  }
+  
+  async removeResidentVehicle(whitelistId) {
+    return await this.api.deleteWhitelistVehicle(this.locationId, whitelistId);
+  }
+}
+```
+</Accordion>
+
+<Accordion title="Bulk Import from CSV">
+Import vehicles from a CSV file:
+
+```python
+import csv
+import asyncio
+from typing import List, Dict
+
+class BulkVehicleImporter:
+    def __init__(self, api: ArqqinParkingAPI):
+        self.api = api
+    
+    async def import_from_csv(self, csv_file_path: str, location_id: str):
+        vehicles = []
+        
+        with open(csv_file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                vehicle_data = {
+                    'referenceId': row['reference_id'],
+                    'plateType': row['plate_type'],
+                    'plateCode': row['plate_code'],
+                    'plateNumber': row['plate_number'],
+                    'vehicleType': row.get('vehicle_type'),
+                    'note': row.get('note')
+                }
+                vehicles.append(vehicle_data)
+        
+        # Process in batches to avoid rate limits
+        batch_size = 10
+        results = []
+        
+        for i in range(0, len(vehicles), batch_size):
+            batch = vehicles[i:i + batch_size]
+            
+            tasks = []
+            for vehicle in batch:
+                task = self.api.add_whitelist_vehicle(location_id, vehicle)
+                tasks.append(task)
+            
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+            results.extend(batch_results)
+            
+            # Wait between batches
+            if i + batch_size < len(vehicles):
+                await asyncio.sleep(1)
+        
+        return results
+```
+</Accordion>
+
+### Webhook Integration
+
+<Accordion title="Webhook Handler for Parking Events">
+Handle parking events with webhooks:
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+// Webhook endpoint for parking events
+app.post('/webhook/parking-events', (req, res) => {
+  const { event, data } = req.body;
+  
+  switch (event) {
+    case 'vehicle_entered':
+      handleVehicleEntry(data);
+      break;
+    case 'vehicle_exited':
+      handleVehicleExit(data);
+      break;
+    case 'unauthorized_vehicle':
+      handleUnauthorizedVehicle(data);
+      break;
+    default:
+      console.log('Unknown event type:', event);
+  }
+  
+  res.status(200).json({ received: true });
+});
+
+function handleVehicleEntry(data) {
+  console.log(`Vehicle ${data.plateType} ${data.plateCode} ${data.plateNumber} entered at ${data.timestamp}`);
+  // Update your system with entry information
+}
+
+function handleVehicleExit(data) {
+  console.log(`Vehicle ${data.plateType} ${data.plateCode} ${data.plateNumber} exited at ${data.timestamp}`);
+  // Update your system with exit information
+}
+
+function handleUnauthorizedVehicle(data) {
+  console.log(`Unauthorized vehicle attempt: ${data.plateType} ${data.plateCode} ${data.plateNumber}`);
+  // Handle unauthorized access attempt
+}
+```
+</Accordion>
+
+## Error Handling Patterns
+
+<Accordion title="Comprehensive Error Handling">
+Implement robust error handling:
+
+```javascript
+class APIErrorHandler {
+  static handleError(error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      switch (status) {
+        case 400:
+          return { type: 'validation', message: data.error?.message || 'Invalid request' };
+        case 401:
+          return { type: 'auth', message: 'Invalid API key' };
+        case 403:
+          return { type: 'permission', message: 'Access denied' };
+        case 404:
+          return { type: 'not_found', message: 'Resource not found' };
+        case 409:
+          return { type: 'conflict', message: 'Vehicle already exists' };
+        case 429:
+          return { type: 'rate_limit', message: 'Rate limit exceeded' };
+        case 500:
+          return { type: 'server', message: 'Internal server error' };
+        default:
+          return { type: 'unknown', message: 'An unexpected error occurred' };
+      }
+    } else if (error.request) {
+      return { type: 'network', message: 'Network error - unable to reach API' };
+    } else {
+      return { type: 'client', message: error.message };
+    }
+  }
+}
+
+// Usage
+try {
+  const result = await api.addWhitelistVehicle(locationId, vehicleData);
+} catch (error) {
+  const errorInfo = APIErrorHandler.handleError(error);
+  console.error(`${errorInfo.type}: ${errorInfo.message}`);
+}
+```
+</Accordion>
+
+## Testing Your Integration
+
+<Accordion title="Unit Tests for API Integration">
+Test your integration with unit tests:
+
+```python
+import unittest
+from unittest.mock import Mock, patch
+from arqqin_api import ArqqinParkingAPI
+
+class TestArqqinAPI(unittest.TestCase):
+    def setUp(self):
+        self.api = ArqqinParkingAPI('test-api-key')
+    
+    @patch('requests.get')
+    def test_get_locations(self, mock_get):
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            'success': True,
+            'data': [{'id': 'location_123', 'name': 'Test Location'}]
+        }
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+        
+        result = self.api.get_locations()
+        
+        self.assertTrue(result['success'])
+        self.assertEqual(len(result['data']), 1)
+        self.assertEqual(result['data'][0]['id'], 'location_123')
+    
+    @patch('requests.post')
+    def test_add_vehicle(self, mock_post):
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            'success': True,
+            'data': {'id': 'whitelist_789', 'plateNumber': '12345'}
+        }
+        mock_response.raise_for_status.return_value = None
+        mock_post.return_value = mock_response
+        
+        vehicle_data = {
+            'referenceId': 'RESIDENT_001',
+            'plateType': 'DXB',
+            'plateCode': 'White',
+            'plateNumber': '12345'
+        }
+        
+        result = self.api.add_whitelist_vehicle('location_123', vehicle_data)
+        
+        self.assertTrue(result['success'])
+        self.assertEqual(result['data']['plateNumber'], '12345')
+
+if __name__ == '__main__':
+    unittest.main()
+```
+</Accordion>

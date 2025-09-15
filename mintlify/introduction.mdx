@@ -1,0 +1,106 @@
+---
+title: "API Introduction"
+description: "Learn about the Arqqin Parking Management API for managing vehicle whitelists and parking access control"
+---
+
+# Arqqin Parking Management API
+
+The Arqqin Parking Management API provides a comprehensive solution for managing parking access through vehicle whitelists. Built with a reference-based architecture, it allows partners to manage parking access by adding, updating, and removing vehicles in a whitelist per location.
+
+<Note>
+This API is designed for integration with property management systems, residential complexes, and commercial parking facilities.
+</Note>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Vehicle Whitelist Management" icon="car">
+    Add, update, and remove vehicles from location-specific whitelists with full CRUD operations.
+  </Card>
+  <Card title="Reference-Based Architecture" icon="link">
+    Group vehicles under any external entity using generic reference IDs (residents, contracts, units, fleets).
+  </Card>
+  <Card title="Location Management" icon="map-pin">
+    Manage multiple parking locations with detailed information and real-time status.
+  </Card>
+  <Card title="Real-Time Status" icon="chart-line">
+    Get live parking occupancy data, gate status, and capacity information.
+  </Card>
+</CardGroup>
+
+## System Architecture
+
+The API follows a clean, reference-based architecture:
+
+- **API Keys**: Scoped to specific locations for security
+- **Vehicle Whitelists**: Managed per location with flexible filtering
+- **Reference IDs**: Generic identifiers to group vehicles under any external entity (no PII required)
+
+<Accordion title="Why Reference-Based Architecture?">
+The reference-based approach provides flexibility and privacy:
+
+- **No PII Required**: Reference IDs can represent any external entity without exposing personal information
+- **Flexible Grouping**: Group multiple vehicles under residents, contracts, units, or fleet accounts
+- **Privacy Compliant**: Maintains data privacy while enabling powerful vehicle management
+- **Integration Friendly**: Easy to map to existing property management or CRM systems
+</Accordion>
+
+## Base URLs
+
+<Tabs>
+  <Tab title="Staging">
+    ```bash
+    https://apistg.arqq.in/api/
+    ```
+  </Tab>
+  <Tab title="Production">
+    ```bash
+    https://api.arqq.in/api/
+    ```
+  </Tab>
+</Tabs>
+
+## Authentication
+
+All API requests require authentication using an API key in the request header:
+
+```http
+X-API-Key: YOUR_API_KEY
+```
+
+<Warning>
+Keep your API keys secure and never expose them in client-side code. Contact hello@arqqin.com to obtain your API key.
+</Warning>
+
+## Quick Start
+
+Get started with the API in three simple steps:
+
+<Steps>
+  <Step title="Get Your API Key">
+    Contact our support team at hello@arqqin.com to obtain your API key. API keys are scoped to specific locations for security.
+  </Step>
+  <Step title="Explore Locations">
+    Use the `/locations` endpoint to discover available parking locations and their details.
+  </Step>
+  <Step title="Manage Whitelist">
+    Add vehicles to whitelists using the `/locations/{locationId}/whitelist` endpoints with your reference IDs.
+  </Step>
+</Steps>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Authentication Guide" icon="key" href="/authentication">
+    Learn about API key authentication and security best practices.
+  </Card>
+  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
+    Get up and running with your first API calls in minutes.
+  </Card>
+  <Card title="Whitelist Management" icon="list-check" href="/guides/whitelist-management">
+    Comprehensive guide to managing vehicle whitelists.
+  </Card>
+  <Card title="Integration Examples" icon="code" href="/guides/integration-examples">
+    Real-world integration examples in JavaScript, Python, and cURL.
+  </Card>
+</CardGroup>

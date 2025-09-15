@@ -1,0 +1,1107 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Arqqin Parking Management API",
+    "description": "API for managing parking access through vehicle whitelists. The API allows partners to manage parking access by adding, updating, and removing vehicles in a whitelist per location using a generic, reference-based system.",
+    "version": "1.3.0",
+    "contact": {
+      "name": "Arqqin Support",
+      "email": "hello@arqqin.com",
+      "url": "https://support.arqq.in"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://apistg.arqq.in/api",
+      "description": "Staging Environment"
+    },
+    {
+      "url": "https://api.arqq.in/api",
+      "description": "Production Environment"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health Check",
+        "description": "Returns API health status and service information",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "healthy": {
+                    "summary": "Healthy service response",
+                    "value": {
+                      "status": "healthy",
+                      "timestamp": "2024-01-20T16:30:00Z",
+                      "service": "arqqin-parking-management",
+                      "version": "1.0.0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/locations": {
+      "get": {
+        "tags": ["Locations"],
+        "summary": "List Locations",
+        "description": "Returns all locations accessible by the API key",
+        "operationId": "listLocations",
+        "responses": {
+          "200": {
+            "description": "List of accessible locations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
+    "/locations/{locationId}": {
+      "get": {
+        "tags": ["Locations"],
+        "summary": "Get Location Details",
+        "description": "Returns detailed information about a specific location",
+        "operationId": "getLocation",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
+    "/locations/{locationId}/status": {
+      "get": {
+        "tags": ["Locations"],
+        "summary": "Get Location Status",
+        "description": "Returns current status and statistics for a location",
+        "operationId": "getLocationStatus",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location status and statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
+    "/locations/{locationId}/whitelist": {
+      "get": {
+        "tags": ["Whitelist"],
+        "summary": "List Whitelist Vehicles",
+        "description": "Returns whitelist vehicles for a location, optionally filtered by various criteria",
+        "operationId": "listWhitelistVehicles",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "description": "Filter by a specific external reference (e.g., residents, tenants, etc.)",
+            "schema": {
+              "type": "string",
+              "example": "REF_001"
+            }
+          },
+          {
+            "name": "plateType",
+            "in": "query",
+            "required": false,
+            "description": "Filter by plate type (e.g., DXB, KSA)",
+            "schema": {
+              "type": "string",
+              "example": "DXB"
+            }
+          },
+          {
+            "name": "plateCode",
+            "in": "query",
+            "required": false,
+            "description": "Filter by plate code/color (e.g., White, A, ABC, 123)",
+            "schema": {
+              "type": "string",
+              "example": "White"
+            }
+          },
+          {
+            "name": "plateNumber",
+            "in": "query",
+            "required": false,
+            "description": "Digits-only plate number (e.g., 12345, 123)",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "example": "12345"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "example": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of whitelist vehicles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhitelistListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Whitelist"],
+        "summary": "Add Whitelist Vehicle",
+        "description": "Adds a new vehicle to the whitelist for a specific location, associated with a referenceId",
+        "operationId": "addWhitelistVehicle",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhitelistVehicleRequest"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Basic vehicle whitelist entry",
+                  "value": {
+                    "referenceId": "REF_001",
+                    "plateType": "DXB",
+                    "plateCode": "White",
+                    "plateNumber": "67890",
+                    "vehicleType": "SUV",
+                    "note": "Second vehicle"
+                  }
+                },
+                "minimal": {
+                  "summary": "Minimal required fields",
+                  "value": {
+                    "referenceId": "REF_002",
+                    "plateType": "AUH",
+                    "plateCode": "A",
+                    "plateNumber": "12345"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle added to whitelist successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhitelistVehicleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "description": "Vehicle already exists in whitelist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "duplicate": {
+                    "summary": "Duplicate vehicle error",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "code": "DUPLICATE_VEHICLE",
+                        "message": "Vehicle with this plate already exists in whitelist",
+                        "details": {
+                          "plateType": "DXB",
+                          "plateCode": "White",
+                          "plateNumber": "67890"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/locations/{locationId}/whitelist/{whitelistId}": {
+      "put": {
+        "tags": ["Whitelist"],
+        "summary": "Update Whitelist Vehicle",
+        "description": "Updates an existing whitelist vehicle",
+        "operationId": "updateWhitelistVehicle",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          },
+          {
+            "name": "whitelistId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the whitelist entry",
+            "schema": {
+              "type": "string",
+              "example": "whitelist_789"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhitelistVehicleUpdateRequest"
+              },
+              "examples": {
+                "update": {
+                  "summary": "Update vehicle information",
+                  "value": {
+                    "referenceId": "REF_001",
+                    "plateType": "DXB",
+                    "plateCode": "A",
+                    "plateNumber": "67890",
+                    "vehicleType": "SUV",
+                    "note": "Updated notes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhitelistVehicleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Whitelist"],
+        "summary": "Remove Whitelist Vehicle",
+        "description": "Removes a vehicle from the location's whitelist",
+        "operationId": "removeWhitelistVehicle",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          },
+          {
+            "name": "whitelistId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the whitelist entry",
+            "schema": {
+              "type": "string",
+              "example": "whitelist_789"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "removed": {
+                    "summary": "Vehicle removed successfully",
+                    "value": {
+                      "success": true,
+                      "message": "Vehicle removed successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key for authentication. Contact hello@arqqin.com to obtain your API key."
+      }
+    },
+    "schemas": {
+      "WhitelistVehicle": {
+        "type": "object",
+        "required": ["id", "locationId", "referenceId", "plateType", "plateCode", "plateNumber", "addedAt", "updatedAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the whitelist entry",
+            "example": "whitelist_789"
+          },
+          "locationId": {
+            "type": "string",
+            "description": "Location where whitelist entry applies",
+            "example": "location_123"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "External reference (e.g., resident, contract, unit, fleet)",
+            "example": "REF_001"
+          },
+          "plateType": {
+            "type": "string",
+            "description": "Issuing authority or region code (e.g., DXB, KSA)",
+            "pattern": "^[A-Z]{2,4}$",
+            "example": "DXB"
+          },
+          "plateCode": {
+            "type": "string",
+            "description": "'White' or 1-3 alphanumeric code (e.g., A, AB, 123)",
+            "pattern": "^(White|[A-Za-z0-9]{1,3})$",
+            "example": "White"
+          },
+          "plateNumber": {
+            "type": "string",
+            "description": "Digits-only license number (e.g., 12345)",
+            "pattern": "^\\d+$",
+            "example": "12345"
+          },
+          "vehicleType": {
+            "type": "string",
+            "description": "Vehicle type (e.g., Sedan, SUV)",
+            "example": "SUV"
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional note",
+            "example": "Preferred entrance: Gate A"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp when vehicle was added",
+            "example": "2024-01-20T16:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp when vehicle was last updated",
+            "example": "2024-01-20T16:30:00Z"
+          }
+        }
+      },
+      "WhitelistVehicleRequest": {
+        "type": "object",
+        "required": ["referenceId", "plateType", "plateCode", "plateNumber"],
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "description": "External reference (e.g., resident, contract, unit, fleet)",
+            "example": "REF_001"
+          },
+          "plateType": {
+            "type": "string",
+            "description": "Issuing authority or region code (e.g., DXB, KSA)",
+            "pattern": "^[A-Z]{2,4}$",
+            "example": "DXB"
+          },
+          "plateCode": {
+            "type": "string",
+            "description": "'White' or 1-3 alphanumeric code (e.g., A, AB, 123)",
+            "pattern": "^(White|[A-Za-z0-9]{1,3})$",
+            "example": "White"
+          },
+          "plateNumber": {
+            "type": "string",
+            "description": "Digits-only license number (e.g., 12345)",
+            "pattern": "^\\d+$",
+            "example": "67890"
+          },
+          "vehicleType": {
+            "type": "string",
+            "description": "Vehicle type (e.g., Sedan, SUV)",
+            "example": "SUV"
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional note",
+            "example": "Second vehicle"
+          }
+        }
+      },
+      "WhitelistVehicleUpdateRequest": {
+        "type": "object",
+        "required": ["referenceId", "plateType", "plateCode", "plateNumber"],
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "description": "External reference (e.g., resident, contract, unit, fleet)",
+            "example": "REF_001"
+          },
+          "plateType": {
+            "type": "string",
+            "description": "Issuing authority or region code (e.g., DXB, KSA)",
+            "pattern": "^[A-Z]{2,4}$",
+            "example": "DXB"
+          },
+          "plateCode": {
+            "type": "string",
+            "description": "'White' or 1-3 alphanumeric code (e.g., A, AB, 123)",
+            "pattern": "^(White|[A-Za-z0-9]{1,3})$",
+            "example": "A"
+          },
+          "plateNumber": {
+            "type": "string",
+            "description": "Digits-only license number (e.g., 12345)",
+            "pattern": "^\\d+$",
+            "example": "67890"
+          },
+          "vehicleType": {
+            "type": "string",
+            "description": "Vehicle type (e.g., Sedan, SUV)",
+            "example": "SUV"
+          },
+          "note": {
+            "type": "string",
+            "description": "Optional note",
+            "example": "Updated notes"
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "required": ["id", "name", "address", "city", "country", "parkingCapacity", "isActive", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the location",
+            "example": "location_123"
+          },
+          "name": {
+            "type": "string",
+            "description": "Location name",
+            "example": "Downtown Residences"
+          },
+          "description": {
+            "type": "string",
+            "description": "Location description",
+            "example": "Luxury residential complex in downtown Dubai"
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address",
+            "example": "123 Main Street, Dubai"
+          },
+          "city": {
+            "type": "string",
+            "description": "City name",
+            "example": "Dubai"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or emirate",
+            "example": "Dubai"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country code",
+            "example": "UAE"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code",
+            "example": "12345"
+          },
+          "coordinates": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "format": "double",
+                "description": "Latitude",
+                "example": 25.2048
+              },
+              "lng": {
+                "type": "number",
+                "format": "double",
+                "description": "Longitude",
+                "example": 55.2708
+              }
+            }
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Timezone identifier",
+            "example": "Asia/Dubai"
+          },
+          "parkingCapacity": {
+            "type": "integer",
+            "description": "Total parking capacity",
+            "example": 150
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether location is active",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp when location was created",
+            "example": "2024-01-15T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp when location was last updated",
+            "example": "2024-01-15T10:00:00Z"
+          }
+        }
+      },
+      "Gate": {
+        "type": "object",
+        "required": ["id", "name", "type", "isActive"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the gate",
+            "example": "gate_1"
+          },
+          "name": {
+            "type": "string",
+            "description": "Gate name",
+            "example": "Main Entrance"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["entry", "exit"],
+            "description": "Gate type",
+            "example": "entry"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether gate is active",
+            "example": true
+          }
+        }
+      },
+      "LocationStatus": {
+        "type": "object",
+        "required": ["totalCapacity", "currentOccupancy", "availableSpaces", "occupancyRate", "activeSessions", "gates", "lastUpdated"],
+        "properties": {
+          "totalCapacity": {
+            "type": "integer",
+            "description": "Total parking capacity",
+            "example": 150
+          },
+          "currentOccupancy": {
+            "type": "integer",
+            "description": "Current number of occupied spaces",
+            "example": 89
+          },
+          "availableSpaces": {
+            "type": "integer",
+            "description": "Number of available spaces",
+            "example": 61
+          },
+          "occupancyRate": {
+            "type": "string",
+            "description": "Occupancy rate as percentage",
+            "example": "59.3%"
+          },
+          "activeSessions": {
+            "type": "integer",
+            "description": "Number of active parking sessions",
+            "example": 89
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Gate"
+            },
+            "description": "List of gates at the location"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of last status update",
+            "example": "2024-01-20T16:30:00Z"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status", "timestamp", "service", "version"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "unhealthy"],
+            "description": "Service health status",
+            "example": "healthy"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of health check",
+            "example": "2024-01-20T16:30:00Z"
+          },
+          "service": {
+            "type": "string",
+            "description": "Service name",
+            "example": "arqqin-parking-management"
+          },
+          "version": {
+            "type": "string",
+            "description": "Service version",
+            "example": "1.0.0"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the request was successful",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Vehicle removed successfully"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["success", "error"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the request was successful",
+            "example": false
+          },
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Error code",
+                "example": "VALIDATION_ERROR"
+              },
+              "message": {
+                "type": "string",
+                "description": "Error message",
+                "example": "Invalid plate number format"
+              },
+              "details": {
+                "type": "object",
+                "description": "Additional error details",
+                "example": {
+                  "field": "plateNumber",
+                  "value": "INVALID_PLATE"
+                }
+              }
+            }
+          }
+        }
+      },
+      "LocationListResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            }
+          }
+        }
+      },
+      "LocationDetailResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Location"
+          }
+        }
+      },
+      "LocationStatusResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/LocationStatus"
+          }
+        }
+      },
+      "WhitelistListResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WhitelistVehicle"
+            }
+          }
+        }
+      },
+      "WhitelistVehicleResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/WhitelistVehicle"
+          }
+        }
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Invalid or missing API key",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "unauthorized": {
+                "summary": "Unauthorized access",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Invalid or missing API key"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "API key doesn't have access to requested resource",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "forbidden": {
+                "summary": "Access forbidden",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "API key doesn't have access to requested resource"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "notFound": {
+                "summary": "Resource not found",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "Resource not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Invalid request data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "validation": {
+                "summary": "Validation error",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "VALIDATION_ERROR",
+                    "message": "Invalid plate number format",
+                    "details": {
+                      "field": "plateNumber",
+                      "value": "INVALID_PLATE"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "RateLimitError": {
+        "description": "Too many requests",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "rateLimit": {
+                "summary": "Rate limit exceeded",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "RATE_LIMIT_EXCEEDED",
+                    "message": "Too many requests"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "internal": {
+                "summary": "Internal server error",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Internal server error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

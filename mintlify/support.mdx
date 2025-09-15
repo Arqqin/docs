@@ -1,0 +1,250 @@
+---
+title: "Support"
+description: "Need help with the Arqqin Parking Management API? We're here to assist you with integration, troubleshooting, and any questions you may have."
+---
+## Contact Information
+
+<CardGroup cols={2}>
+  <Card title="Email Support" icon="envelope">
+    **Primary Support Channel**
+    
+    Send us an email at hello@arqqin.com for:
+    - Technical questions and integration help
+    - API key requests and permissions
+    - Bug reports and feature requests
+    - General inquiries
+    
+    **Response Time**: 24-48 hours during business days
+  </Card>
+  <Card title="Emergency Support" icon="phone">
+    **Critical Issues Only**
+    
+    For production-critical issues:
+    - Service outages
+    - Security concerns
+    - Data integrity issues
+    
+    **Response Time**: 4-8 hours
+  </Card>
+</CardGroup>
+
+## Getting Help
+
+### Before Contacting Support
+
+<Steps>
+  <Step title="Check Documentation">
+    Review the API documentation and guides to see if your question is already answered.
+  </Step>
+  <Step title="Search Error Messages">
+    Look up specific error codes and messages in our error handling guide.
+  </Step>
+  <Step title="Test with cURL">
+    Try reproducing the issue using cURL commands to isolate the problem.
+  </Step>
+  <Step title="Check API Status">
+    Verify the API is operational at https://status.arqq.in
+  </Step>
+</Steps>
+
+### What to Include in Support Requests
+
+When contacting support, please include:
+
+<Accordion title="Technical Details">
+- **API Version**: Which version of the API you're using
+- **Endpoint**: The specific endpoint causing issues
+- **Request Details**: Complete request headers, body, and parameters (redact API keys)
+- **Response**: Full error response including status codes and error messages
+- **Environment**: Staging or production environment
+</Accordion>
+
+<Accordion title="Context Information">
+- **Use Case**: What you're trying to accomplish
+- **Integration Type**: Programming language, framework, or tool you're using
+- **Timeline**: When the issue started occurring
+- **Frequency**: How often the issue happens
+- **Impact**: How this affects your application or users
+</Accordion>
+
+### Support Request Template
+
+Use this template to ensure we have all the information needed to help you quickly:
+
+```
+Subject: [API Support] Brief description of issue
+
+**Environment**: Staging/Production
+**API Version**: 1.3.0
+**Endpoint**: POST /locations/{locationId}/whitelist
+**Programming Language**: JavaScript/Python/etc.
+
+**Issue Description**:
+[Describe what you're trying to do and what's happening]
+
+**Steps to Reproduce**:
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+**Request Details**:
+```
+[Include your request headers and body - redact API keys]
+```
+
+**Response**:
+```
+[Include the full error response]
+```
+
+**Expected Behavior**:
+[What you expected to happen]
+
+**Additional Context**:
+[Any other relevant information]
+```
+
+## Common Support Topics
+
+### API Key Issues
+
+<Accordion title="Getting Your First API Key">
+1. Send an email to hello@arqqin.com with:
+   - Your company information
+   - Use case description
+   - Locations you need access to
+   - Expected request volume
+
+2. Our team will review your request and provide an API key within 1-2 business days.
+
+3. Test your API key using the health check endpoint.
+</Accordion>
+
+<Accordion title="API Key Permissions">
+If you need access to additional locations or different permissions:
+
+- Contact hello@arqqin.com with your current API key (last 4 characters only)
+- Specify the additional permissions needed
+- Provide business justification for the request
+
+Updates are typically processed within 24 hours.
+</Accordion>
+
+### Integration Help
+
+<Accordion title="SDK and Code Examples">
+We provide comprehensive SDKs and examples for:
+- JavaScript/Node.js
+- Python
+- cURL commands
+- Common frameworks (React, Django, etc.)
+
+Check our integration examples guide for ready-to-use code.
+</Accordion>
+
+<Accordion title="Webhook Integration">
+For webhook integration support:
+- Provide your webhook endpoint URL
+- Specify which events you want to receive
+- Include your webhook verification process
+- Test webhook delivery in staging environment first
+</Accordion>
+
+### Rate Limiting
+
+<Accordion title="Rate Limit Increases">
+To request a rate limit increase:
+- Provide current usage statistics
+- Explain the business need
+- Specify the requested limit
+- Include any relevant contracts or agreements
+
+Rate limit increases may require a different pricing tier.
+</Accordion>
+
+## Community Resources
+
+<CardGroup cols={2}>
+  <Card title="GitHub Repository" icon="code-branch" href="https://github.com/arqqin/api-examples">
+    Open source examples and community contributions
+  </Card>
+  <Card title="Developer Forum" icon="comments" href="https://community.arqq.in">
+    Connect with other developers and share solutions
+  </Card>
+  <Card title="Status Page" icon="chart-line" href="https://status.arqq.in">
+    Monitor API status and subscribe to updates
+  </Card>
+  <Card title="Blog" icon="newspaper" href="https://blog.arqq.in">
+    Latest updates, tutorials, and best practices
+  </Card>
+</CardGroup>
+
+## SLA and Support Levels
+
+### Standard Support
+- **Response Time**: 24-48 hours
+- **Availability**: Business days (Monday-Friday, 9 AM - 6 PM UAE time)
+- **Coverage**: General questions, integration help, bug reports
+
+### Premium Support
+- **Response Time**: 4-8 hours
+- **Availability**: Extended hours and weekend support
+- **Coverage**: Priority support, dedicated account manager, phone support
+- **Requirements**: Enterprise plan or custom agreement
+
+### Emergency Support
+- **Response Time**: 1-4 hours
+- **Availability**: 24/7 for critical issues
+- **Coverage**: Service outages, security incidents, data integrity issues
+- **Requirements**: Production environment with SLA agreement
+
+## Feedback and Feature Requests
+
+We value your feedback and suggestions for improving the API:
+
+<Accordion title="Feature Requests">
+Submit feature requests via email to hello@arqqin.com with:
+- Detailed description of the requested feature
+- Use case and business justification
+- Expected impact on your integration
+- Any mockups or examples if applicable
+
+Feature requests are reviewed quarterly and prioritized based on user demand and technical feasibility.
+</Accordion>
+
+<Accordion title="API Feedback">
+Help us improve the API by providing feedback on:
+- Documentation clarity and completeness
+- API design and usability
+- Error messages and responses
+- Performance and reliability
+
+Your feedback helps us make the API better for everyone.
+</Accordion>
+
+## Security and Privacy
+
+<Warning>
+**Security Issues**: If you discover a security vulnerability, please email hello@arqqin.com immediately. Do not report security issues through public channels.
+</Warning>
+
+<Accordion title="Data Privacy">
+We take data privacy seriously:
+- API keys are encrypted and stored securely
+- Vehicle data is processed according to privacy regulations
+- We don't store or log sensitive personal information
+- All data transmission is encrypted using HTTPS
+
+For privacy questions or data requests, contact hello@arqqin.com.
+</Accordion>
+
+## Training and Resources
+
+<CardGroup cols={2}>
+  <Card title="API Workshop" icon="graduation-cap" href="mailto:hello@arqqin.com">
+    Request a custom API workshop for your team
+  </Card>
+  <Card title="Integration Review" icon="clipboard-check" href="mailto:hello@arqqin.com">
+    Get a review of your integration implementation
+  </Card>
+</CardGroup>

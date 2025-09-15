@@ -1,0 +1,319 @@
+---
+title: "Rate Limits"
+description: "The Arqqin Parking Management API implements rate limiting to ensure fair usage and maintain service quality for all users."
+---
+## Rate Limit Overview
+
+- **Limit**: 1000 requests per hour per API key
+- **Window**: Rolling 1-hour window
+- **Scope**: Applied per API key across all endpoints
+
+<Info>
+Rate limits are applied per API key, so each key gets its own 1000 requests per hour allocation.
+</Info>
+
+## Rate Limit Headers
+
+Every API response includes rate limit information in the response headers:
+
+<CodeGroup>
+```bash Response Headers
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1640995200
+```
+
+```javascript JavaScript
+// Example of checking rate limit headers
+const response = await fetch('/api/locations', {
+  headers: {
+    'X-API-Key': 'YOUR_API_KEY'
+  }
+});
+
+console.log('Rate limit:', response.headers.get('X-RateLimit-Limit'));
+console.log('Remaining:', response.headers.get('X-RateLimit-Remaining'));
+console.log('Resets at:', new Date(parseInt(response.headers.get('X-RateLimit-Reset')) * 1000));
+```
+
+```python Python
+import requests
+from datetime import datetime
+
+response = requests.get('/api/locations', headers={'X-API-Key': 'YOUR_API_KEY'})
+
+print('Rate limit:', response.headers.get('X-RateLimit-Limit'))
+print('Remaining:', response.headers.get('X-RateLimit-Remaining'))
+reset_time = datetime.fromtimestamp(int(response.headers.get('X-RateLimit-Reset')))
+print('Resets at:', reset_time)
+```
+</CodeGroup>
+
+### Header Descriptions
+
+<ResponseField name="X-RateLimit-Limit" type="integer" required>
+  Maximum number of requests allowed per hour
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Remaining" type="integer" required>
+  Number of requests remaining in the current hour
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Reset" type="integer" required>
+  Unix timestamp when the rate limit resets
+</ResponseField>
+
+## Rate Limit Exceeded Response
+
+When you exceed the rate limit, you'll receive a 429 status code with an error response:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests"
+  }
+}
+```
+
+## Best Practices
+
+### Implement Exponential Backoff
+
+When you receive a 429 response, implement exponential backoff to retry your requests:
+
+<CodeGroup>
+```javascript JavaScript
+async function apiCallWithRetry(url, options, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      if (response.status === 429) {
+        // Rate limit exceeded, wait and retry
+        const retryAfter = response.headers.get('Retry-After') || Math.pow(2, attempt);
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+}
+```
+
+```python Python
+import time
+import requests
+
+def api_call_with_retry(url, headers, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, headers=headers)
+            
+            if response.status_code == 429:
+                # Rate limit exceeded, wait and retry
+                retry_after = response.headers.get('Retry-After', 2 ** attempt)
+                time.sleep(int(retry_after))
+                continue
+                
+            return response
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(2 ** attempt)
+```
+
+```bash cURL with Retry Logic
+#!/bin/bash
+
+make_request() {
+  local url=$1
+  local api_key=$2
+  local attempt=1
+  local max_attempts=3
+  
+  while [ $attempt -le $max_attempts ]; do
+    response=$(curl -s -w "%{http_code}" -X GET "$url" \
+      -H "X-API-Key: $api_key" \
+      -H "Content-Type: application/json")
+    
+    http_code="${response: -3}"
+    
+    if [ "$http_code" = "429" ]; then
+      echo "Rate limit exceeded, retrying in $((2 ** attempt)) seconds..."
+      sleep $((2 ** attempt))
+      attempt=$((attempt + 1))
+    else
+      echo "$response"
+      break
+    fi
+  done
+}
+```
+</CodeGroup>
+
+### Monitor Your Usage
+
+Track your API usage to avoid hitting rate limits:
+
+<CodeGroup>
+```javascript JavaScript
+class RateLimitMonitor {
+  constructor() {
+    this.requests = [];
+    this.hourlyLimit = 1000;
+  }
+  
+  canMakeRequest() {
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    
+    // Remove requests older than 1 hour
+    this.requests = this.requests.filter(timestamp => timestamp > oneHourAgo);
+    
+    return this.requests.length < this.hourlyLimit;
+  }
+  
+  recordRequest() {
+    this.requests.push(Date.now());
+  }
+  
+  getRemainingRequests() {
+    return Math.max(0, this.hourlyLimit - this.requests.length);
+  }
+}
+```
+
+```python Python
+import time
+from collections import deque
+
+class RateLimitMonitor:
+    def __init__(self, hourly_limit=1000):
+        self.hourly_limit = hourly_limit
+        self.requests = deque()
+    
+    def can_make_request(self):
+        now = time.time()
+        one_hour_ago = now - 3600
+        
+        # Remove requests older than 1 hour
+        while self.requests and self.requests[0] < one_hour_ago:
+            self.requests.popleft()
+        
+        return len(self.requests) < self.hourly_limit
+    
+    def record_request(self):
+        self.requests.append(time.time())
+    
+    def get_remaining_requests(self):
+        return max(0, self.hourly_limit - len(self.requests))
+```
+</CodeGroup>
+
+### Batch Operations
+
+When possible, batch multiple operations to reduce the number of API calls:
+
+<Note>
+Instead of making individual API calls for each vehicle, consider batching operations or using bulk endpoints when available.
+</Note>
+
+## Request Optimization Tips
+
+### Cache Responses
+
+Cache frequently accessed data like location information:
+
+<CodeGroup>
+```javascript JavaScript
+class LocationCache {
+  constructor(ttl = 300000) { // 5 minutes
+    this.cache = new Map();
+    this.ttl = ttl;
+  }
+  
+  get(locationId) {
+    const cached = this.cache.get(locationId);
+    if (cached && Date.now() - cached.timestamp < this.ttl) {
+      return cached.data;
+    }
+    return null;
+  }
+  
+  set(locationId, data) {
+    this.cache.set(locationId, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+}
+```
+
+```python Python
+import time
+from typing import Optional, Any
+
+class LocationCache:
+    def __init__(self, ttl: int = 300):  # 5 minutes
+        self.cache = {}
+        self.ttl = ttl
+    
+    def get(self, location_id: str) -> Optional[Any]:
+        cached = self.cache.get(location_id)
+        if cached and time.time() - cached['timestamp'] < self.ttl:
+            return cached['data']
+        return None
+    
+    def set(self, location_id: str, data: Any):
+        self.cache[location_id] = {
+            'data': data,
+            'timestamp': time.time()
+        }
+```
+</CodeGroup>
+
+### Use Appropriate Endpoints
+
+Choose the most efficient endpoint for your use case:
+
+- Use filtering parameters to reduce data transfer
+- Use specific endpoints instead of general ones when possible
+- Consider pagination for large datasets
+
+## Rate Limit Increase
+
+If you need a higher rate limit for your use case, contact hello@arqqin.com with:
+
+- Your current usage patterns
+- Expected request volume
+- Business justification for the increase
+
+<Info>
+Rate limit increases are evaluated on a case-by-case basis and may require a different pricing tier.
+</Info>
+
+## Monitoring and Alerts
+
+Set up monitoring to track your API usage:
+
+<Accordion title="Usage Monitoring">
+Monitor your API usage with:
+- Track requests per hour
+- Set up alerts when approaching limits
+- Monitor error rates and retry patterns
+- Log rate limit headers for analysis
+</Accordion>
+
+<Accordion title="Error Handling">
+Implement proper error handling for:
+- 429 rate limit responses
+- Network timeouts
+- Temporary service unavailability
+- Invalid responses
+</Accordion>

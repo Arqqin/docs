@@ -1,0 +1,375 @@
+---
+title: "Quickstart Guide"
+description: "Get up and running with the Arqqin Parking Management API in just a few minutes. This guide will walk you through making your first API calls and managing vehicle whitelists."
+---
+
+## Prerequisites
+
+<Steps>
+  <Step title="API Key">
+    You'll need a valid API key. If you don't have one, contact hello@arqqin.com to obtain your key.
+  </Step>
+  <Step title="HTTP Client">
+    Use any HTTP client like cURL, Postman, or your preferred programming language's HTTP library.
+  </Step>
+  <Step title="Base URL">
+    Use the staging environment for testing: `https://apistg.arqq.in/api/`
+  </Step>
+</Steps>
+
+## Step 1: Test Your Connection
+
+Start by testing your API key with the health check endpoint:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/health" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = 'https://apistg.arqq.in/api';
+
+async function testConnection() {
+  try {
+    const response = await fetch(`${BASE_URL}/health`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    console.log('Health check:', data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+testConnection();
+```
+
+```python Python
+import requests
+
+API_KEY = 'YOUR_API_KEY'
+BASE_URL = 'https://apistg.arqq.in/api'
+
+def test_connection():
+    headers = {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.get(f'{BASE_URL}/health', headers=headers)
+        response.raise_for_status()
+        print('Health check:', response.json())
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+
+test_connection()
+```
+</CodeGroup>
+
+<Check>
+You should receive a response like:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-20T16:30:00Z",
+  "service": "arqqin-parking-management",
+  "version": "1.0.0"
+}
+```
+</Check>
+
+## Step 2: List Available Locations
+
+Discover the locations you have access to:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/locations" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+async function getLocations() {
+  try {
+    const response = await fetch(`${BASE_URL}/locations`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    console.log('Locations:', data.data);
+    return data.data[0]; // Return first location for next step
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+const location = await getLocations();
+```
+
+```python Python
+def get_locations():
+    headers = {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.get(f'{BASE_URL}/locations', headers=headers)
+        response.raise_for_status()
+        locations = response.json()['data']
+        print('Locations:', locations)
+        return locations[0]  # Return first location for next step
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+
+location = get_locations()
+```
+</CodeGroup>
+
+## Step 3: Add a Vehicle to Whitelist
+
+Now let's add a vehicle to the whitelist. Replace `location_123` with your actual location ID:
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://apistg.arqq.in/api/locations/location_123/whitelist" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "RESIDENT_001",
+    "plateType": "DXB",
+    "plateCode": "White",
+    "plateNumber": "12345",
+    "vehicleType": "Sedan",
+    "note": "Primary vehicle for apartment 4B"
+  }'
+```
+
+```javascript JavaScript
+async function addVehicle(locationId) {
+  const vehicleData = {
+    referenceId: "RESIDENT_001",
+    plateType: "DXB",
+    plateCode: "White", 
+    plateNumber: "12345",
+    vehicleType: "Sedan",
+    note: "Primary vehicle for apartment 4B"
+  };
+
+  try {
+    const response = await fetch(`${BASE_URL}/locations/${locationId}/whitelist`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(vehicleData)
+    });
+    
+    const data = await response.json();
+    console.log('Vehicle added:', data.data);
+    return data.data.id; // Return vehicle ID for next step
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+const vehicleId = await addVehicle(location.id);
+```
+
+```python Python
+def add_vehicle(location_id):
+    vehicle_data = {
+        "referenceId": "RESIDENT_001",
+        "plateType": "DXB",
+        "plateCode": "White",
+        "plateNumber": "12345",
+        "vehicleType": "Sedan",
+        "note": "Primary vehicle for apartment 4B"
+    }
+    
+    headers = {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.post(
+            f'{BASE_URL}/locations/{location_id}/whitelist',
+            headers=headers,
+            json=vehicle_data
+        )
+        response.raise_for_status()
+        vehicle = response.json()['data']
+        print('Vehicle added:', vehicle)
+        return vehicle['id']  # Return vehicle ID for next step
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+
+vehicle_id = add_vehicle(location['id'])
+```
+</CodeGroup>
+
+## Step 4: List Whitelist Vehicles
+
+Verify your vehicle was added by listing all whitelist vehicles:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/whitelist" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+async function listWhitelist(locationId) {
+  try {
+    const response = await fetch(`${BASE_URL}/locations/${locationId}/whitelist`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    console.log('Whitelist vehicles:', data.data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+await listWhitelist(location.id);
+```
+
+```python Python
+def list_whitelist(location_id):
+    headers = {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.get(
+            f'{BASE_URL}/locations/{location_id}/whitelist',
+            headers=headers
+        )
+        response.raise_for_status()
+        vehicles = response.json()['data']
+        print('Whitelist vehicles:', vehicles)
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+
+list_whitelist(location['id'])
+```
+</CodeGroup>
+
+## Step 5: Get Location Status
+
+Check the current parking status of your location:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/status" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+async function getLocationStatus(locationId) {
+  try {
+    const response = await fetch(`${BASE_URL}/locations/${locationId}/status`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    console.log('Location status:', data.data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+await getLocationStatus(location.id);
+```
+
+```python Python
+def get_location_status(location_id):
+    headers = {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.get(
+            f'{BASE_URL}/locations/{location_id}/status',
+            headers=headers
+        )
+        response.raise_for_status()
+        status = response.json()['data']
+        print('Location status:', status)
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+
+get_location_status(location['id'])
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Complete API Reference" icon="book" href="/api-reference">
+    Explore all available endpoints and their parameters.
+  </Card>
+  <Card title="Whitelist Management Guide" icon="list-check" href="/guides/whitelist-management">
+    Learn advanced whitelist management techniques.
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation" href="/guides/error-handling">
+    Understand error responses and best practices.
+  </Card>
+  <Card title="Integration Examples" icon="code" href="/guides/integration-examples">
+    See real-world integration examples and SDKs.
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<Accordion title="Getting 401 Unauthorized">
+This usually means:
+- Missing or invalid API key
+- API key not properly formatted in header
+- API key doesn't have access to the requested resource
+
+Double-check your API key and ensure it's included in the `X-API-Key` header.
+</Accordion>
+
+<Accordion title="Getting 404 Not Found">
+This typically indicates:
+- Invalid location ID
+- Endpoint URL is incorrect
+- Resource doesn't exist
+
+Verify your location ID and endpoint URLs match the API reference.
+</Accordion>
+
+<Accordion title="Getting 400 Validation Error">
+This means:
+- Required fields are missing
+- Invalid data format (e.g., non-numeric plate numbers)
+- Invalid plate type or code format
+
+Check the validation rules in the API reference and ensure your data matches the expected format.
+</Accordion>

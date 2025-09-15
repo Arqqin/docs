@@ -1,0 +1,517 @@
+---
+title: "Whitelist Management Guide"
+description: "This guide provides comprehensive information about managing vehicle whitelists using the Arqqin Parking Management API. Learn about the reference-based architecture, validation rules, and best practices."
+---
+## Understanding Whitelist Architecture
+
+The Arqqin Parking Management API uses a **reference-based architecture** for managing vehicle whitelists:
+
+<CardGroup cols={2}>
+  <Card title="Reference-Based Design" icon="link">
+    Group multiple vehicles under any external entity using generic reference IDs.
+  </Card>
+  <Card title="Location-Scoped" icon="map-pin">
+    Each whitelist entry is specific to a particular parking location.
+  </Card>
+  <Card title="No PII Required" icon="shield">
+    Reference IDs can represent any external entity without exposing personal information.
+  </Card>
+  <Card title="Flexible Grouping" icon="users">
+    Group vehicles under residents, contracts, units, or fleet accounts.
+  </Card>
+</CardGroup>
+
+### Reference ID Examples
+
+Reference IDs can represent various external entities:
+
+<Tabs>
+  <Tab title="Residential">
+    - `RESIDENT_001` - Individual resident
+    - `UNIT_4B` - Apartment unit
+    - `TENANT_ABC123` - Tenant account
+  </Tab>
+  <Tab title="Commercial">
+    - `CONTRACT_2024_001` - Service contract
+    - `FLEET_DELIVERY` - Delivery fleet
+    - `VENDOR_SUPPLIER` - Vendor account
+  </Tab>
+  <Tab title="Custom">
+    - `CUSTOMER_12345` - Your customer ID
+    - `EMPLOYEE_EMP001` - Employee ID
+    - `VISITOR_PASS_001` - Visitor pass
+  </Tab>
+</Tabs>
+
+## Vehicle Plate Format
+
+The API supports flexible vehicle plate formats with specific validation rules:
+
+### Plate Components
+
+<ResponseField name="plateType" type="string" required>
+  Issuing authority or region code (e.g., DXB, KSA, AUH)
+</ResponseField>
+
+<ResponseField name="plateCode" type="string" required>
+  Either "White" or 1-3 alphanumeric characters (e.g., A, AB, 123)
+</ResponseField>
+
+<ResponseField name="plateNumber" type="string" required>
+  Digits-only license number (e.g., 12345)
+</ResponseField>
+
+### Validation Rules
+
+<Accordion title="Plate Type Validation">
+- **Format**: Uppercase letters only
+- **Length**: 2-4 characters recommended
+- **Examples**: DXB, AUH, KSA, SHJ
+- **Pattern**: `^[A-Z]{2,4}$`
+</Accordion>
+
+<Accordion title="Plate Code Validation">
+- **Format**: Either "White" or 1-3 alphanumeric characters
+- **Examples**: White, A, AB, 123, ABC
+- **Pattern**: `^(White|[A-Za-z0-9]{1,3})$`
+</Accordion>
+
+<Accordion title="Plate Number Validation">
+- **Format**: Digits only
+- **Examples**: 12345, 123, 67890
+- **Pattern**: `^\d+$`
+</Accordion>
+
+### Plate Format Examples
+
+<Tabs>
+  <Tab title="Dubai (DXB)">
+    - DXB White 12345
+    - DXB A 12345
+    - DXB ABC 12345
+  </Tab>
+  <Tab title="Abu Dhabi (AUH)">
+    - AUH White 12345
+    - AUH 1 12345
+    - AUH 123 12345
+  </Tab>
+  <Tab title="Saudi Arabia (KSA)">
+    - KSA ZCA 12345
+    - KSA ABC 12345
+    - KSA ADR 12345
+  </Tab>
+</Tabs>
+
+## Managing Whitelist Entries
+
+### Adding Vehicles
+
+Add vehicles to the whitelist with all required information:
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://apistg.arqq.in/api/locations/location_123/whitelist" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "RESIDENT_001",
+    "plateType": "DXB",
+    "plateCode": "White",
+    "plateNumber": "12345",
+    "vehicleType": "Sedan",
+    "note": "Primary vehicle for apartment 4B"
+  }'
+```
+
+```javascript JavaScript
+async function addVehicle(locationId, vehicleData) {
+  const response = await fetch(`/api/locations/${locationId}/whitelist`, {
+    method: 'POST',
+    headers: {
+      'X-API-Key': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(vehicleData)
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
+// Example usage
+const vehicleData = {
+  referenceId: "RESIDENT_001",
+  plateType: "DXB",
+  plateCode: "White",
+  plateNumber: "12345",
+  vehicleType: "Sedan",
+  note: "Primary vehicle for apartment 4B"
+};
+
+const result = await addVehicle("location_123", vehicleData);
+```
+
+```python Python
+import requests
+
+def add_vehicle(location_id, vehicle_data):
+    headers = {
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.post(
+        f'/api/locations/{location_id}/whitelist',
+        headers=headers,
+        json=vehicle_data
+    )
+    
+    response.raise_for_status()
+    return response.json()
+
+# Example usage
+vehicle_data = {
+    "referenceId": "RESIDENT_001",
+    "plateType": "DXB",
+    "plateCode": "White",
+    "plateNumber": "12345",
+    "vehicleType": "Sedan",
+    "note": "Primary vehicle for apartment 4B"
+}
+
+result = add_vehicle("location_123", vehicle_data)
+```
+</CodeGroup>
+
+### Listing Vehicles
+
+Retrieve vehicles from the whitelist with optional filtering:
+
+<CodeGroup>
+```bash cURL - List All Vehicles
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/whitelist" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash cURL - Filter by Reference ID
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/whitelist?referenceId=RESIDENT_001" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```bash cURL - Filter by Plate Type
+curl -X GET "https://apistg.arqq.in/api/locations/location_123/whitelist?plateType=DXB" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+// List all vehicles
+async function listAllVehicles(locationId) {
+  const response = await fetch(`/api/locations/${locationId}/whitelist`, {
+    headers: {
+      'X-API-Key': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  return response.json();
+}
+
+// Filter by reference ID
+async function listVehiclesByReference(locationId, referenceId) {
+  const url = `/api/locations/${locationId}/whitelist?referenceId=${encodeURIComponent(referenceId)}`;
+  const response = await fetch(url, {
+    headers: {
+      'X-API-Key': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  return response.json();
+}
+
+// Filter by plate type
+async function listVehiclesByPlateType(locationId, plateType) {
+  const url = `/api/locations/${locationId}/whitelist?plateType=${encodeURIComponent(plateType)}`;
+  const response = await fetch(url, {
+    headers: {
+      'X-API-Key': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  return response.json();
+}
+```
+
+```python Python
+def list_all_vehicles(location_id):
+    headers = {
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.get(f'/api/locations/{location_id}/whitelist', headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+def list_vehicles_by_reference(location_id, reference_id):
+    headers = {
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    params = {'referenceId': reference_id}
+    response = requests.get(f'/api/locations/{location_id}/whitelist', headers=headers, params=params)
+    response.raise_for_status()
+    return response.json()
+
+def list_vehicles_by_plate_type(location_id, plate_type):
+    headers = {
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    params = {'plateType': plate_type}
+    response = requests.get(f'/api/locations/{location_id}/whitelist', headers=headers, params=params)
+    response.raise_for_status()
+    return response.json()
+```
+</CodeGroup>
+
+### Updating Vehicles
+
+Update existing whitelist entries:
+
+<CodeGroup>
+```bash cURL
+curl -X PUT "https://apistg.arqq.in/api/locations/location_123/whitelist/whitelist_789" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "referenceId": "RESIDENT_001",
+    "plateType": "DXB",
+    "plateCode": "A",
+    "plateNumber": "67890",
+    "vehicleType": "SUV",
+    "note": "Updated vehicle information"
+  }'
+```
+
+```javascript JavaScript
+async function updateVehicle(locationId, whitelistId, vehicleData) {
+  const response = await fetch(`/api/locations/${locationId}/whitelist/${whitelistId}`, {
+    method: 'PUT',
+    headers: {
+      'X-API-Key': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(vehicleData)
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return response.json();
+}
+```
+
+```python Python
+def update_vehicle(location_id, whitelist_id, vehicle_data):
+    headers = {
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.put(
+        f'/api/locations/{location_id}/whitelist/{whitelist_id}',
+        headers=headers,
+        json=vehicle_data
+    )
+    
+    response.raise_for_status()
+    return response.json()
+```
+</CodeGroup>
+
+### Removing Vehicles
+
+Remove vehicles from the whitelist:
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://apistg.arqq.in/api/locations/location_123/whitelist/whitelist_789" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+async function removeVehicle(locationId, whitelistId) {
+  const response = await fetch(`/api/locations/${locationId}/whitelist/${whitelistId}`, {
+    method: 'DELETE',
+    headers: {
+      'X-API-Key': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return response.json();
+}
+```
+
+```python Python
+def remove_vehicle(location_id, whitelist_id):
+    headers = {
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.delete(
+        f'/api/locations/{location_id}/whitelist/{whitelist_id}',
+        headers=headers
+    )
+    
+    response.raise_for_status()
+    return response.json()
+```
+</CodeGroup>
+
+## Best Practices
+
+### Reference ID Management
+
+<Steps>
+  <Step title="Use Consistent Formats">
+    Establish a consistent format for your reference IDs (e.g., `RESIDENT_001`, `UNIT_4B`, `CONTRACT_2024_001`).
+  </Step>
+  <Step title="Avoid PII">
+    Don't include personal information in reference IDs. Use system-generated identifiers instead.
+  </Step>
+  <Step title="Document Your Schema">
+    Document your reference ID format for your team and future maintenance.
+  </Step>
+</Steps>
+
+### Error Handling
+
+<Accordion title="Handle Duplicate Vehicles">
+When adding vehicles, handle potential duplicates:
+
+```javascript
+async function addVehicleSafely(locationId, vehicleData) {
+  try {
+    return await addVehicle(locationId, vehicleData);
+  } catch (error) {
+    if (error.response?.status === 409) {
+      console.log('Vehicle already exists in whitelist');
+      // Handle duplicate - maybe update instead
+    } else {
+      throw error;
+    }
+  }
+}
+```
+</Accordion>
+
+<Accordion title="Validate Data Before Sending">
+Always validate plate data before making API calls:
+
+```javascript
+function validatePlateData(plateData) {
+  const { plateType, plateCode, plateNumber } = plateData;
+  
+  // Validate plate type
+  if (!/^[A-Z]{2,4}$/.test(plateType)) {
+    throw new Error('Invalid plate type format');
+  }
+  
+  // Validate plate code
+  if (!/^(White|[A-Za-z0-9]{1,3})$/.test(plateCode)) {
+    throw new Error('Invalid plate code format');
+  }
+  
+  // Validate plate number
+  if (!/^\d+$/.test(plateNumber)) {
+    throw new Error('Invalid plate number format');
+  }
+  
+  return true;
+}
+```
+</Accordion>
+
+### Bulk Operations
+
+<Note>
+For bulk operations, consider implementing client-side batching and rate limit management to avoid hitting API limits.
+</Note>
+
+```javascript
+async function bulkAddVehicles(locationId, vehicles) {
+  const batchSize = 10; // Process 10 vehicles at a time
+  const results = [];
+  
+  for (let i = 0; i < vehicles.length; i += batchSize) {
+    const batch = vehicles.slice(i, i + batchSize);
+    
+    const promises = batch.map(vehicle => 
+      addVehicle(locationId, vehicle).catch(error => ({ error, vehicle }))
+    );
+    
+    const batchResults = await Promise.all(promises);
+    results.push(...batchResults);
+    
+    // Wait between batches to respect rate limits
+    if (i + batchSize < vehicles.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  return results;
+}
+```
+
+## Common Use Cases
+
+### Residential Property Management
+
+<Card title="Resident Vehicle Management" icon="home">
+Manage vehicles for residents in apartment complexes:
+
+- Group vehicles by apartment unit (`UNIT_4B`)
+- Track primary and secondary vehicles
+- Handle temporary visitor passes
+- Manage parking permits and renewals
+</Card>
+
+### Commercial Fleet Management
+
+<Card title="Fleet Vehicle Tracking" icon="truck">
+Track commercial fleet vehicles:
+
+- Group vehicles by service contracts (`CONTRACT_2024_001`)
+- Manage delivery vehicle access
+- Track vendor and supplier vehicles
+- Monitor employee parking privileges
+</Card>
+
+### Event and Visitor Management
+
+<Card title="Temporary Access" icon="calendar">
+Handle temporary vehicle access:
+
+- Create temporary visitor passes (`VISITOR_PASS_001`)
+- Manage event parking
+- Track contractor access
+- Handle emergency vehicle access
+</Card>

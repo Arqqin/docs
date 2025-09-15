@@ -1,0 +1,84 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Arqqin",
+  "logo": {
+    "dark": "/logo/dark-logo.png",
+    "light": "/logo/light-logo.png",
+    "href": "https://docs.arqq.in"
+  },
+  "brandName": "Arqqin",
+  "modeToggle": {
+    "default": "light",
+    "isHidden": false
+  },
+  "favicon": "/logo/icon.png",
+  "colors": {
+    "primary": "#2563eb",
+    "light": "#f8fafc",
+    "dark": "#0f172a",
+    "anchors": {
+      "from": "#2563eb",
+      "to": "#7c3aed"
+    }
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "authentication",
+        "rate-limits"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/whitelist-management",
+        "guides/error-handling",
+        "guides/integration-examples"
+      ]
+    },
+    { "group": "Resources", "pages": ["changelog", "support"] }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/arqqin",
+    "x-twitter": "https://x.com/arqqin",
+    "linkedin": "https://www.linkedin.com/company/arqqin"
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
+  "search": {
+    "prompt": "Search Arqqin API documentation...",
+    "algolia": {
+      "appId": "local",
+      "apiKey": "local",
+      "indexName": "local",
+      "algoliaAppId": "local",
+      "algoliaApiKey": "local",
+      "algoliaIndexName": "local"
+    }
+  },
+  "metadata": {
+    "title": "Arqqin - Backend API Documentation",
+    "description": "Comprehensive API documentation for the Arqqin platform",
+    "og:title": "Arqqin Backend API Documentation",
+    "og:description": "Complete guide to integrating with the Arqqin platform"
+  },
+  "api": {
+    "openapi": "openapi.json",
+    "baseUrl": "https://apistg.arqq.in/api/",
+    "auth": {
+      "method": "bearer"
+    }
+  }
+}

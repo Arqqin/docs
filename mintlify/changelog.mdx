@@ -1,0 +1,186 @@
+---
+title: "Changelog"
+description: "Track all changes, updates, and new features in the Arqqin Parking Management API."
+---
+
+<Update label="Version 1.3.0" tags={["feature", "breaking"]} date="2025-09-03">
+  <p>
+    **Major Update**: Replaced resident-specific endpoints with generic whitelist vehicle management system.
+  </p>
+  
+  <h4>New Features</h4>
+  <ul>
+    <li>Introduced <code>referenceId</code> system for flexible vehicle grouping</li>
+    <li>Added comprehensive vehicle plate validation</li>
+    <li>Enhanced filtering capabilities for whitelist queries</li>
+    <li>Improved error handling with detailed validation messages</li>
+  </ul>
+  
+  <h4>Breaking Changes</h4>
+  <ul>
+    <li>Removed resident-specific endpoints</li>
+    <li>Updated vehicle data structure with new validation rules</li>
+    <li>Changed authentication requirements for certain endpoints</li>
+  </ul>
+  
+  <h4>Improvements</h4>
+  <ul>
+    <li>Enhanced API response consistency</li>
+    <li>Improved documentation and examples</li>
+    <li>Better error messages for debugging</li>
+  </ul>
+</Update>
+
+<Update label="Version 1.2.0" tags={["feature"]} date="2025-08-07">
+  <p>
+    **Initial API Release**: Core parking management functionality with location and vehicle management.
+  </p>
+  
+  <h4>Features Added</h4>
+  <ul>
+    <li>Location management endpoints</li>
+    <li>Resident and vehicle management</li>
+    <li>Parking activity tracking</li>
+    <li>Real-time status monitoring</li>
+  </ul>
+  
+  <h4>Authentication</h4>
+  <ul>
+    <li>API key-based authentication</li>
+    <li>Location-scoped access control</li>
+  </ul>
+</Update>
+
+<Update label="Version 1.1.0" tags={["feature", "improvement"]} date="2025-07-15">
+  <p>
+    **Enhancement Release**: Improved performance and additional features.
+  </p>
+  
+  <h4>New Features</h4>
+  <ul>
+    <li>Bulk vehicle import capabilities</li>
+    <li>Enhanced filtering options</li>
+    <li>Webhook support for real-time events</li>
+  </ul>
+  
+  <h4>Performance Improvements</h4>
+  <ul>
+    <li>Reduced API response times by 40%</li>
+    <li>Optimized database queries</li>
+    <li>Improved caching mechanisms</li>
+  </ul>
+</Update>
+
+<Update label="Version 1.0.0" tags={["initial"]} date="2025-06-01">
+  <p>
+    **Initial Release**: First version of the Arqqin Parking Management API.
+  </p>
+  
+  <h4>Core Features</h4>
+  <ul>
+    <li>Basic location management</li>
+    <li>Simple vehicle whitelist management</li>
+    <li>API key authentication</li>
+    <li>Health check endpoint</li>
+  </ul>
+</Update>
+
+## Migration Guides
+
+### Migrating from Version 1.2.0 to 1.3.0
+
+<Warning>
+Version 1.3.0 introduces breaking changes that require code updates.
+</Warning>
+
+<Steps>
+  <Step title="Update Vehicle Data Structure">
+    Replace resident-specific fields with the new <code>referenceId</code> system:
+    
+    ```javascript
+    // Old format (v1.2.0)
+    const vehicleData = {
+      residentId: "RES_001",
+      plateType: "DXB",
+      plateCode: "White",
+      plateNumber: "12345"
+    };
+    
+    // New format (v1.3.0)
+    const vehicleData = {
+      referenceId: "RESIDENT_001",  // Use your own reference system
+      plateType: "DXB",
+      plateCode: "White",
+      plateNumber: "12345"
+    };
+    ```
+  </Step>
+  
+  <Step title="Update Endpoint URLs">
+    Replace resident-specific endpoints with generic whitelist endpoints:
+    
+    ```bash
+    # Old endpoints (v1.2.0)
+    GET /locations/{locationId}/residents/{residentId}/vehicles
+    POST /locations/{locationId}/residents/{residentId}/vehicles
+    
+    # New endpoints (v1.3.0)
+    GET /locations/{locationId}/whitelist?referenceId={referenceId}
+    POST /locations/{locationId}/whitelist
+    ```
+  </Step>
+  
+  <Step title="Update Validation Logic">
+    Implement new plate validation rules:
+    
+    ```javascript
+    // New validation requirements
+    const validationRules = {
+      plateType: /^[A-Z]{2,4}$/,           // 2-4 uppercase letters
+      plateCode: /^(White|[A-Za-z0-9]{1,3})$/, // "White" or 1-3 alphanumeric
+      plateNumber: /^\d+$/                 // Digits only
+    };
+    ```
+  </Step>
+</Steps>
+
+## Deprecation Notices
+
+<Update label="Deprecated Endpoints" tags={["deprecated"]} date="2025-09-03">
+  <p>
+    The following endpoints are deprecated and will be removed in version 2.0.0:
+  </p>
+  
+  <ul>
+    <li><code>GET /locations/{locationId}/residents</code> - Use <code>GET /locations/{locationId}/whitelist</code> with filtering</li>
+    <li><code>POST /locations/{locationId}/residents</code> - Use <code>POST /locations/{locationId}/whitelist</code></li>
+    <li><code>GET /locations/{locationId}/residents/{residentId}/vehicles</code> - Use <code>GET /locations/{locationId}/whitelist?referenceId={referenceId}</code></li>
+  </ul>
+</Update>
+
+## Planned Features
+
+<Accordion title="Version 1.4.0 (Q4 2025)">
+- Bulk operations for vehicle management
+- Advanced filtering and search capabilities
+- Webhook support for parking events
+- Enhanced analytics and reporting endpoints
+</Accordion>
+
+<Accordion title="Version 2.0.0 (Q1 2026)">
+- Complete API redesign with improved consistency
+- Enhanced security features
+- GraphQL support
+- Advanced rate limiting and usage analytics
+</Accordion>
+
+## Support and Feedback
+
+<CardGroup cols={2}>
+  <Card title="Report Issues" icon="bug" href="mailto:hello@arqqin.com">
+    Report bugs or request new features.
+  </Card>
+  <Card title="API Status" icon="chart-line" href="https://status.arqq.in">
+    Monitor API status and performance.
+  </Card>
+</CardGroup>

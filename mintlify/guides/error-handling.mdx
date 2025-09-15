@@ -1,0 +1,556 @@
+---
+title: "Error Handling"
+description: "This guide covers error handling best practices, common error scenarios, and troubleshooting techniques for the Arqqin Parking Management API."
+---
+
+## Error Response Format
+
+All API endpoints return consistent error responses with the following structure:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": {
+      "field": "specific_field_name",
+      "value": "invalid_value"
+    }
+  }
+}
+```
+
+## Common Error Codes
+
+<Table>
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `UNAUTHORIZED` | 401 | Invalid or missing API key |
+| `FORBIDDEN` | 403 | API key doesn't have access to requested resource |
+| `NOT_FOUND` | 404 | Resource not found |
+| `VALIDATION_ERROR` | 400 | Invalid request data |
+| `DUPLICATE_VEHICLE` | 409 | Vehicle already exists in whitelist |
+| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
+| `INTERNAL_ERROR` | 500 | Internal server error |
+</Table>
+
+## Authentication Errors
+
+### Invalid API Key
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid or missing API key"
+  }
+}
+```
+
+```javascript JavaScript Handling
+try {
+  const response = await api.getLocations();
+} catch (error) {
+  if (error.response?.status === 401) {
+    console.error('Invalid API key. Please check your credentials.');
+    // Redirect to login or show authentication error
+  }
+}
+```
+
+```python Python Handling
+try:
+    response = api.get_locations()
+except requests.exceptions.HTTPError as e:
+    if e.response.status_code == 401:
+        print("Invalid API key. Please check your credentials.")
+        # Handle authentication error
+```
+</CodeGroup>
+
+### Missing API Key
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "API key is required"
+  }
+}
+```
+
+```bash cURL Fix
+# ❌ Missing API key
+curl -X GET "https://apistg.arqq.in/api/locations"
+
+# ✅ Correct with API key
+curl -X GET "https://apistg.arqq.in/api/locations" \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+</CodeGroup>
+
+## Validation Errors
+
+### Invalid Plate Format
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid plate number format",
+    "details": {
+      "field": "plateNumber",
+      "value": "INVALID_PLATE"
+    }
+  }
+}
+```
+
+```javascript JavaScript Validation
+function validatePlateData(plateData) {
+  const { plateType, plateCode, plateNumber } = plateData;
+  const errors = [];
+  
+  // Validate plate type
+  if (!/^[A-Z]{2,4}$/.test(plateType)) {
+    errors.push('Plate type must be 2-4 uppercase letters (e.g., DXB, AUH)');
+  }
+  
+  // Validate plate code
+  if (!/^(White|[A-Za-z0-9]{1,3})$/.test(plateCode)) {
+    errors.push('Plate code must be "White" or 1-3 alphanumeric characters');
+  }
+  
+  // Validate plate number
+  if (!/^\d+$/.test(plateNumber)) {
+    errors.push('Plate number must contain only digits');
+  }
+  
+  return errors;
+}
+
+// Usage
+const plateData = {
+  plateType: "DXB",
+  plateCode: "White",
+  plateNumber: "12345"
+};
+
+const errors = validatePlateData(plateData);
+if (errors.length > 0) {
+  console.error('Validation errors:', errors);
+} else {
+  // Proceed with API call
+}
+```
+
+```python Python Validation
+import re
+
+def validate_plate_data(plate_data):
+    errors = []
+    plate_type = plate_data.get('plateType', '')
+    plate_code = plate_data.get('plateCode', '')
+    plate_number = plate_data.get('plateNumber', '')
+    
+    # Validate plate type
+    if not re.match(r'^[A-Z]{2,4}$', plate_type):
+        errors.append('Plate type must be 2-4 uppercase letters (e.g., DXB, AUH)')
+    
+    # Validate plate code
+    if not re.match(r'^(White|[A-Za-z0-9]{1,3})$', plate_code):
+        errors.append('Plate code must be "White" or 1-3 alphanumeric characters')
+    
+    # Validate plate number
+    if not re.match(r'^\d+$', plate_number):
+        errors.append('Plate number must contain only digits')
+    
+    return errors
+
+# Usage
+plate_data = {
+    'plateType': 'DXB',
+    'plateCode': 'White',
+    'plateNumber': '12345'
+}
+
+errors = validate_plate_data(plate_data)
+if errors:
+    print('Validation errors:', errors)
+else:
+    # Proceed with API call
+    pass
+```
+</CodeGroup>
+
+### Missing Required Fields
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Missing required field: referenceId",
+    "details": {
+      "field": "referenceId",
+      "value": null
+    }
+  }
+}
+```
+
+```javascript JavaScript Fix
+// ❌ Missing required field
+const vehicleData = {
+  plateType: "DXB",
+  plateCode: "White",
+  plateNumber: "12345"
+  // Missing referenceId
+};
+
+// ✅ Complete data
+const vehicleData = {
+  referenceId: "RESIDENT_001",  // Required field
+  plateType: "DXB",
+  plateCode: "White",
+  plateNumber: "12345",
+  vehicleType: "Sedan",
+  note: "Primary vehicle"
+};
+```
+</CodeGroup>
+
+## Resource Not Found Errors
+
+### Invalid Location ID
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Location not found",
+    "details": {
+      "field": "locationId",
+      "value": "invalid_location_123"
+    }
+  }
+}
+```
+
+```javascript JavaScript Handling
+async function getLocationSafely(locationId) {
+  try {
+    const response = await api.getLocation(locationId);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      console.error(`Location ${locationId} not found`);
+      return null;
+    }
+    throw error;
+  }
+}
+```
+</CodeGroup>
+
+### Invalid Whitelist ID
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Whitelist entry not found",
+    "details": {
+      "field": "whitelistId",
+      "value": "invalid_whitelist_123"
+    }
+  }
+}
+```
+</CodeGroup>
+
+## Duplicate Vehicle Errors
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "DUPLICATE_VEHICLE",
+    "message": "Vehicle with this plate already exists in whitelist",
+    "details": {
+      "plateType": "DXB",
+      "plateCode": "White",
+      "plateNumber": "12345"
+    }
+  }
+}
+```
+
+```javascript JavaScript Handling
+async function addVehicleSafely(locationId, vehicleData) {
+  try {
+    return await api.addWhitelistVehicle(locationId, vehicleData);
+  } catch (error) {
+    if (error.response?.status === 409) {
+      const errorData = error.response.data;
+      console.log('Vehicle already exists:', errorData.error.details);
+      
+      // Option 1: Return existing vehicle info
+      return { success: false, reason: 'duplicate', details: errorData.error.details };
+      
+      // Option 2: Update existing vehicle instead
+      // const existingVehicle = await findExistingVehicle(locationId, vehicleData);
+      // return await api.updateWhitelistVehicle(locationId, existingVehicle.id, vehicleData);
+    }
+    throw error;
+  }
+}
+```
+</CodeGroup>
+
+## Rate Limiting Errors
+
+<CodeGroup>
+```json Error Response
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests"
+  }
+}
+```
+
+```javascript JavaScript Rate Limit Handling
+class RateLimitHandler {
+  constructor() {
+    this.retryDelay = 1000; // Start with 1 second
+    this.maxRetries = 3;
+  }
+  
+  async makeRequestWithRetry(requestFn) {
+    for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+      try {
+        return await requestFn();
+      } catch (error) {
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers['retry-after'] || this.retryDelay;
+          console.log(`Rate limit exceeded. Retrying in ${retryAfter} seconds...`);
+          
+          if (attempt < this.maxRetries - 1) {
+            await this.sleep(retryAfter * 1000);
+            this.retryDelay *= 2; // Exponential backoff
+            continue;
+          }
+        }
+        throw error;
+      }
+    }
+  }
+  
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+// Usage
+const rateLimitHandler = new RateLimitHandler();
+
+try {
+  const result = await rateLimitHandler.makeRequestWithRetry(
+    () => api.addWhitelistVehicle(locationId, vehicleData)
+  );
+} catch (error) {
+  console.error('Request failed after retries:', error.message);
+}
+```
+</CodeGroup>
+
+## Network Errors
+
+### Connection Timeout
+
+<CodeGroup>
+```javascript JavaScript Network Error Handling
+async function makeRequestWithTimeout(url, options, timeout = 10000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - please check your connection');
+    }
+    throw error;
+  }
+}
+```
+
+```python Python Network Error Handling
+import requests
+from requests.exceptions import Timeout, ConnectionError
+
+def make_request_with_retry(url, headers, data=None, timeout=10, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            if data:
+                response = requests.post(url, headers=headers, json=data, timeout=timeout)
+            else:
+                response = requests.get(url, headers=headers, timeout=timeout)
+            
+            response.raise_for_status()
+            return response
+            
+        except Timeout:
+            print(f"Request timeout (attempt {attempt + 1}/{max_retries})")
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
+                continue
+            raise Exception("Request timeout after all retries")
+            
+        except ConnectionError:
+            print(f"Connection error (attempt {attempt + 1}/{max_retries})")
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise Exception("Connection error after all retries")
+```
+</CodeGroup>
+
+## Comprehensive Error Handler
+
+<Accordion title="Complete Error Handler Implementation">
+Implement a comprehensive error handler for all scenarios:
+
+```javascript
+class APIErrorHandler {
+  static handleError(error, context = {}) {
+    const errorInfo = {
+      timestamp: new Date().toISOString(),
+      context,
+      ...this.parseError(error)
+    };
+    
+    // Log error for debugging
+    console.error('API Error:', errorInfo);
+    
+    // Return user-friendly error message
+    return {
+      success: false,
+      error: errorInfo,
+      userMessage: this.getUserMessage(errorInfo)
+    };
+  }
+  
+  static parseError(error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      return {
+        type: 'api_error',
+        status,
+        code: data?.error?.code || 'UNKNOWN_ERROR',
+        message: data?.error?.message || 'API request failed',
+        details: data?.error?.details
+      };
+    } else if (error.request) {
+      return {
+        type: 'network_error',
+        message: 'Unable to connect to API server'
+      };
+    } else {
+      return {
+        type: 'client_error',
+        message: error.message || 'An unexpected error occurred'
+      };
+    }
+  }
+  
+  static getUserMessage(errorInfo) {
+    switch (errorInfo.code) {
+      case 'UNAUTHORIZED':
+        return 'Please check your API key and try again.';
+      case 'FORBIDDEN':
+        return 'You do not have permission to access this resource.';
+      case 'NOT_FOUND':
+        return 'The requested resource was not found.';
+      case 'VALIDATION_ERROR':
+        return 'Please check your input data and try again.';
+      case 'DUPLICATE_VEHICLE':
+        return 'This vehicle is already in the whitelist.';
+      case 'RATE_LIMIT_EXCEEDED':
+        return 'Too many requests. Please wait a moment and try again.';
+      default:
+        return 'An error occurred. Please try again later.';
+    }
+  }
+}
+
+// Usage
+try {
+  const result = await api.addWhitelistVehicle(locationId, vehicleData);
+} catch (error) {
+  const errorInfo = APIErrorHandler.handleError(error, { 
+    operation: 'add_vehicle',
+    locationId,
+    vehicleData 
+  });
+  
+  // Show user-friendly message
+  showNotification(errorInfo.userMessage);
+  
+  // Log detailed error for debugging
+  console.error('Detailed error:', errorInfo);
+}
+```
+</Accordion>
+
+## Troubleshooting Checklist
+
+<Steps>
+  <Step title="Check API Key">
+    Verify your API key is correct and has the necessary permissions for the requested resource.
+  </Step>
+  <Step title="Validate Request Data">
+    Ensure all required fields are present and data formats are correct according to the API specification.
+  </Step>
+  <Step title="Check Rate Limits">
+    Verify you haven't exceeded the 1000 requests per hour limit. Check rate limit headers in responses.
+  </Step>
+  <Step title="Verify Resource IDs">
+    Confirm that location IDs and whitelist IDs are valid and exist in your account.
+  </Step>
+  <Step title="Test Network Connectivity">
+    Ensure your application can reach the API endpoints and there are no firewall or network issues.
+  </Step>
+</Steps>
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="Contact Support" icon="envelope" href="mailto:hello@arqqin.com">
+    Get help with specific error scenarios and troubleshooting.
+  </Card>
+  <Card title="API Status" icon="chart-line" href="https://status.arqq.in">
+    Check API status and known issues.
+  </Card>
+</CardGroup>
