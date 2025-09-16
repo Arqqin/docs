@@ -161,6 +161,10 @@ Version 1.3.0 introduces breaking changes that require code updates.
 ## Planned Features
 
 <Accordion title="Version 1.4.0 (Q4 2025)">
+- **Company Management**: Multi-tenant support with optional `externalCompanyId` for client-managed company references
+- **Combined Location Status**: New endpoint `GET /locations/status` for aggregated status across all accessible locations
+- **Location Registration**: Dynamic location creation and management with `POST /locations` and `PUT /locations/{locationId}`
+- **Enhanced Multi-tenancy**: Company-scoped API access with support for both internal and external company identifiers
 - Bulk operations for vehicle management
 - Advanced filtering and search capabilities
 - Webhook support for parking events
