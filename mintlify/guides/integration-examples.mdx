@@ -22,6 +22,21 @@ class ArqqinParkingAPI {
     });
   }
 
+  // Register a new company (static method, no authentication required)
+  static async registerCompany(companyData, baseURL = 'https://apistg.arqq.in/api') {
+    try {
+      const client = axios.create({
+        baseURL,
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const response = await client.post('/register/company', companyData);
+      return response.data;
+    } catch (error) {
+      console.error('Error registering company:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
   // List all accessible locations
   async getLocations() {
     try {
@@ -29,6 +44,39 @@ class ArqqinParkingAPI {
       return response.data;
     } catch (error) {
       console.error('Error fetching locations:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Add a new location
+  async addLocation(locationData) {
+    try {
+      const response = await this.client.post('/locations', locationData);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding location:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Update an existing location
+  async updateLocation(locationId, locationData) {
+    try {
+      const response = await this.client.put(`/locations/${locationId}`, locationData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating location:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Get bulk location status for all company locations
+  async getBulkLocationStatus() {
+    try {
+      const response = await this.client.get('/locations/status');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching bulk location status:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -118,8 +166,52 @@ class ArqqinParkingAPI {
   }
 }
 
-// Usage example
+// Usage examples
+
+// 1. Register a new company (no authentication required)
+ArqqinParkingAPI.registerCompany({
+  companyName: "Downtown Property Management",
+  companySlug: "downtown-pm",
+  adminEmail: "admin@downtownpm.com",
+  adminPassword: "SecurePassword123",
+  adminFirstName: "John",
+  adminLastName: "Smith",
+  businessAddress: "123 Business Street, Dubai",
+  country: "UAE"
+})
+  .then(result => console.log('Company registered:', result))
+  .catch(error => console.error('Registration error:', error));
+
+// 2. Use authenticated API instance
 const api = new ArqqinParkingAPI('your-api-key');
+
+// Add a new location
+api.addLocation({
+  name: "Sunset Towers",
+  slug: "sunset-towers",
+  address: "456 Sunset Boulevard, Dubai Marina",
+  city: "Dubai",
+  country: "UAE",
+  coordinates: { lat: 25.0772, lng: 55.1409 }
+})
+  .then(result => console.log('Location added:', result))
+  .catch(error => console.error('Error:', error));
+
+// Update an existing location
+api.updateLocation('location_123', {
+  name: "Sunset Towers Updated",
+  address: "456 Sunset Boulevard (Renovated), Dubai Marina",
+  city: "Dubai",
+  country: "UAE",
+  coordinates: { lat: 25.0773, lng: 55.1410 }
+})
+  .then(result => console.log('Location updated:', result))
+  .catch(error => console.error('Error:', error));
+
+// Get bulk status for all locations
+api.getBulkLocationStatus()
+  .then(result => console.log('Bulk status:', result))
+  .catch(error => console.error('Error:', error));
 
 // List whitelist vehicles for a reference
 api.listWhitelist('location_123', { referenceId: 'REF_001' })
@@ -132,16 +224,16 @@ const ArqqinParkingAPI = require('./arqqin-parking-api');
 
 async function main() {
   const api = new ArqqinParkingAPI('your-api-key');
-  
+
   try {
     // Test connection
     const health = await api.healthCheck();
     console.log('API Health:', health);
-    
+
     // Get locations
     const locations = await api.getLocations();
     console.log('Available locations:', locations.data);
-    
+
     // Add a vehicle
     const vehicleData = {
       referenceId: 'RESIDENT_001',
@@ -154,7 +246,7 @@ async function main() {
     
     const result = await api.addWhitelistVehicle('location_123', vehicleData);
     console.log('Vehicle added:', result.data);
-    
+
   } catch (error) {
     console.error('Error:', error.message);
   }
@@ -205,9 +297,36 @@ class ArqqinParkingAPI:
                 print(f"Response: {e.response.text}")
             raise
 
+    @staticmethod
+    def register_company(company_data: Dict[str, Any], base_url: str = 'https://apistg.arqq.in/api') -> Dict[str, Any]:
+        """Register a new company (no authentication required)"""
+        headers = {'Content-Type': 'application/json'}
+
+        try:
+            response = requests.post(f"{base_url}/register/company", headers=headers, json=company_data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Company registration failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response: {e.response.text}")
+            raise
+
     def get_locations(self) -> Dict[str, Any]:
         """Get all accessible locations"""
         return self._make_request('GET', '/locations')
+
+    def add_location(self, location_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Add a new location"""
+        return self._make_request('POST', '/locations', data=location_data)
+
+    def update_location(self, location_id: str, location_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an existing location"""
+        return self._make_request('PUT', f'/locations/{location_id}', data=location_data)
+
+    def get_bulk_location_status(self) -> Dict[str, Any]:
+        """Get bulk location status for all company locations"""
+        return self._make_request('GET', '/locations/status')
 
     def get_location(self, location_id: str) -> Dict[str, Any]:
         """Get location details"""

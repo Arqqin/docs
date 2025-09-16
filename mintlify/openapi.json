@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Arqqin Parking Management API",
-    "description": "API for managing parking access through vehicle whitelists. The API allows partners to manage parking access by adding, updating, and removing vehicles in a whitelist per location using a generic, reference-based system.",
-    "version": "1.3.0",
+    "description": "Comprehensive API for property management companies to register, manage locations, and control parking access through vehicle whitelists. The API supports company onboarding, location management, and reference-based vehicle whitelist system.",
+    "version": "1.4.0",
     "contact": {
       "name": "Arqqin Support",
       "email": "hello@arqqin.com",
@@ -30,6 +30,63 @@
     }
   ],
   "paths": {
+    "/register/company": {
+      "post": {
+        "tags": ["Company Management"],
+        "summary": "Register Company",
+        "description": "Registers a new property management company with the system. This endpoint does not require authentication as it's used for initial company onboarding.",
+        "operationId": "registerCompany",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyRegistrationRequest"
+              },
+              "examples": {
+                "complete": {
+                  "summary": "Complete company registration",
+                  "value": {
+                    "companyName": "Downtown Property Management",
+                    "companySlug": "downtown-pm",
+                    "externalCompanyId": "EXT_12345",
+                    "description": "Premium property management services",
+                    "website": "https://downtownpm.com",
+                    "adminEmail": "admin@downtownpm.com",
+                    "adminPassword": "SecurePassword123",
+                    "adminFirstName": "John",
+                    "adminLastName": "Smith",
+                    "adminPhone": "+1234567890",
+                    "businessAddress": "123 Business Street, Dubai",
+                    "city": "Dubai",
+                    "country": "UAE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Company registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyRegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": ["System"],
@@ -85,6 +142,90 @@
             "$ref": "#/components/responses/ForbiddenError"
           }
         }
+      },
+      "post": {
+        "tags": ["Location Management"],
+        "summary": "Add Location",
+        "description": "Creates a new location for the authenticated company. Requires API key authentication.",
+        "operationId": "addLocation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationRequest"
+              },
+              "examples": {
+                "complete": {
+                  "summary": "Complete location data",
+                  "value": {
+                    "name": "Sunset Towers",
+                    "slug": "sunset-towers",
+                    "referenceId": "PROP_001",
+                    "description": "Luxury residential complex with premium amenities",
+                    "address": "456 Sunset Boulevard, Dubai Marina",
+                    "city": "Dubai",
+                    "state": "Dubai",
+                    "country": "UAE",
+                    "postalCode": "12345",
+                    "coordinates": {
+                      "lat": 25.0772,
+                      "lng": 55.1409
+                    },
+                    "timezone": "Asia/Dubai"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Location created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          }
+        }
+      }
+    },
+    "/locations/status": {
+      "get": {
+        "tags": ["Location Management"],
+        "summary": "Get Bulk Location Status",
+        "description": "Returns current status and statistics for all locations accessible by the API key. This provides a company-wide overview of parking status across all managed properties.",
+        "operationId": "getBulkLocationStatus",
+        "responses": {
+          "200": {
+            "description": "Bulk location status for all company locations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkLocationStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
       }
     },
     "/locations/{locationId}": {
@@ -124,6 +265,90 @@
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Location Management"],
+        "summary": "Update Location",
+        "description": "Updates an existing location's information. API key must have permission to modify the location.",
+        "operationId": "updateLocation",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the location to update",
+            "schema": {
+              "type": "string",
+              "example": "location_123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationUpdateRequest"
+              },
+              "examples": {
+                "update_basic": {
+                  "summary": "Update basic location info",
+                  "value": {
+                    "name": "Sunset Towers Updated",
+                    "address": "456 Sunset Boulevard (New Wing), Dubai Marina",
+                    "city": "Dubai",
+                    "country": "UAE"
+                  }
+                },
+                "update_complete": {
+                  "summary": "Complete location update",
+                  "value": {
+                    "name": "Sunset Towers Residence",
+                    "slug": "sunset-towers-residence",
+                    "description": "Updated luxury residential complex with premium amenities",
+                    "address": "456 Sunset Boulevard (Renovated), Dubai Marina",
+                    "city": "Dubai",
+                    "state": "Dubai",
+                    "country": "UAE",
+                    "postalCode": "54321",
+                    "coordinates": {
+                      "lat": 25.0773,
+                      "lng": 55.1410
+                    },
+                    "timezone": "Asia/Dubai"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Location updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
           }
         }
       }
@@ -963,6 +1188,509 @@
             "$ref": "#/components/schemas/WhitelistVehicle"
           }
         }
+      },
+      "CompanyRegistrationRequest": {
+        "type": "object",
+        "required": ["companyName", "companySlug", "adminEmail", "adminPassword", "adminFirstName", "adminLastName", "businessAddress", "country"],
+        "properties": {
+          "companyName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9\\s\\-&.,()]+$",
+            "description": "Company name (1-100 characters, alphanumeric with spaces and common symbols)",
+            "example": "Downtown Property Management"
+          },
+          "companySlug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-z0-9-]+$",
+            "description": "URL-friendly company identifier (lowercase letters, numbers, hyphens only)",
+            "example": "downtown-pm"
+          },
+          "externalCompanyId": {
+            "type": "string",
+            "description": "External system reference ID",
+            "example": "EXT_12345"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Company description (max 500 characters)",
+            "example": "Premium property management services"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "description": "Company website URL",
+            "example": "https://downtownpm.com"
+          },
+          "adminEmail": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255,
+            "description": "Primary admin email address",
+            "example": "admin@downtownpm.com"
+          },
+          "adminPassword": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)",
+            "description": "Admin password (min 8 chars, must contain uppercase, lowercase, and number)",
+            "example": "SecurePassword123"
+          },
+          "adminFirstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-zA-Z\\s\\-']+$",
+            "description": "Admin first name",
+            "example": "John"
+          },
+          "adminLastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-zA-Z\\s\\-']+$",
+            "description": "Admin last name",
+            "example": "Smith"
+          },
+          "adminPhone": {
+            "type": "string",
+            "pattern": "^\\+?[1-9]\\d{1,14}$",
+            "description": "Admin phone number (valid international format)",
+            "example": "+1234567890"
+          },
+          "businessAddress": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Company business address",
+            "example": "123 Business Street, Dubai"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "City name",
+            "example": "Dubai"
+          },
+          "country": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-zA-Z\\s]+$",
+            "description": "Country name",
+            "example": "UAE"
+          }
+        }
+      },
+      "CompanyRegistrationResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "required": ["companyId", "companyName", "companySlug", "adminEmail", "adminUserId"],
+            "properties": {
+              "companyId": {
+                "type": "string",
+                "description": "Unique company identifier",
+                "example": "k17abc123def456ghi789jkl012mno345"
+              },
+              "companyName": {
+                "type": "string",
+                "description": "Company name",
+                "example": "Downtown Property Management"
+              },
+              "companySlug": {
+                "type": "string",
+                "description": "Company slug",
+                "example": "downtown-pm"
+              },
+              "adminEmail": {
+                "type": "string",
+                "description": "Admin email",
+                "example": "admin@downtownpm.com"
+              },
+              "adminUserId": {
+                "type": "string",
+                "description": "Admin user identifier",
+                "example": "k17def456ghi789jkl012mno345pqr678"
+              }
+            }
+          }
+        }
+      },
+      "LocationRequest": {
+        "type": "object",
+        "required": ["name", "slug", "address"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Location name",
+            "example": "Sunset Towers"
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-z0-9-]+$",
+            "description": "URL-friendly location identifier",
+            "example": "sunset-towers"
+          },
+          "referenceId": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "External reference (property ID, etc.)",
+            "example": "PROP_001"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Location description",
+            "example": "Luxury residential complex with premium amenities"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Physical address",
+            "example": "456 Sunset Boulevard, Dubai Marina"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "City name",
+            "example": "Dubai"
+          },
+          "state": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "State/province",
+            "example": "Dubai"
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Country name",
+            "example": "UAE"
+          },
+          "postalCode": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9\\s-]{2,10}$",
+            "description": "Postal/ZIP code",
+            "example": "12345"
+          },
+          "coordinates": {
+            "type": "object",
+            "required": ["lat", "lng"],
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90,
+                "description": "Latitude",
+                "example": 25.0772
+              },
+              "lng": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180,
+                "description": "Longitude",
+                "example": 55.1409
+              }
+            }
+          },
+          "timezone": {
+            "type": "string",
+            "pattern": "^[A-Za-z_\\/]+$",
+            "description": "Timezone identifier",
+            "example": "Asia/Dubai"
+          }
+        }
+      },
+      "LocationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Location name",
+            "example": "Sunset Towers Updated"
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-z0-9-]+$",
+            "description": "URL-friendly location identifier",
+            "example": "sunset-towers-updated"
+          },
+          "referenceId": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "External reference (property ID, etc.)",
+            "example": "PROP_001_UPDATED"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Location description",
+            "example": "Updated luxury residential complex with premium amenities"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Physical address",
+            "example": "456 Sunset Boulevard (Renovated), Dubai Marina"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "City name",
+            "example": "Dubai"
+          },
+          "state": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "State/province",
+            "example": "Dubai"
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Country name",
+            "example": "UAE"
+          },
+          "postalCode": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9\\s-]{2,10}$",
+            "description": "Postal/ZIP code",
+            "example": "54321"
+          },
+          "coordinates": {
+            "type": "object",
+            "required": ["lat", "lng"],
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90,
+                "description": "Latitude",
+                "example": 25.0773
+              },
+              "lng": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180,
+                "description": "Longitude",
+                "example": 55.1410
+              }
+            }
+          },
+          "timezone": {
+            "type": "string",
+            "pattern": "^[A-Za-z_\\/]+$",
+            "description": "Timezone identifier",
+            "example": "Asia/Dubai"
+          }
+        }
+      },
+      "LocationResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "required": ["_id", "companyId", "name", "slug", "address", "isActive", "createdAt", "updatedAt"],
+            "properties": {
+              "_id": {
+                "type": "string",
+                "description": "Location identifier",
+                "example": "k17xyz789abc123def456ghi012jkl345"
+              },
+              "companyId": {
+                "type": "string",
+                "description": "Parent company identifier",
+                "example": "k17abc123def456ghi789jkl012mno345"
+              },
+              "name": {
+                "type": "string",
+                "example": "Sunset Towers"
+              },
+              "slug": {
+                "type": "string",
+                "example": "sunset-towers"
+              },
+              "referenceId": {
+                "type": "string",
+                "example": "PROP_001"
+              },
+              "description": {
+                "type": "string",
+                "example": "Luxury residential complex"
+              },
+              "address": {
+                "type": "string",
+                "example": "456 Sunset Boulevard, Dubai Marina"
+              },
+              "city": {
+                "type": "string",
+                "example": "Dubai"
+              },
+              "state": {
+                "type": "string",
+                "example": "Dubai"
+              },
+              "country": {
+                "type": "string",
+                "example": "UAE"
+              },
+              "postalCode": {
+                "type": "string",
+                "example": "12345"
+              },
+              "coordinates": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "example": 25.0772
+                  },
+                  "lng": {
+                    "type": "number",
+                    "example": 55.1409
+                  }
+                }
+              },
+              "timezone": {
+                "type": "string",
+                "example": "Asia/Dubai"
+              },
+              "isActive": {
+                "type": "boolean",
+                "example": true
+              },
+              "createdAt": {
+                "type": "number",
+                "example": 1705320000000
+              },
+              "updatedAt": {
+                "type": "number",
+                "example": 1705320000000
+              }
+            }
+          }
+        }
+      },
+      "BulkLocationStatusResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "required": ["companyId", "totalLocations", "locations", "lastUpdated"],
+            "properties": {
+              "companyId": {
+                "type": "string",
+                "description": "Company identifier",
+                "example": "k17abc123def456ghi789jkl012mno345"
+              },
+              "totalLocations": {
+                "type": "integer",
+                "description": "Total number of locations",
+                "example": 3
+              },
+              "locations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BulkLocationStatus"
+                }
+              },
+              "lastUpdated": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO timestamp of last update",
+                "example": "2024-01-20T16:30:00Z"
+              }
+            }
+          }
+        }
+      },
+      "BulkLocationStatus": {
+        "type": "object",
+        "required": ["locationId", "locationName", "locationSlug", "totalCapacity", "currentOccupancy", "availableSpaces", "occupancyRate", "activeSessions", "activeGates", "lastUpdated"],
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "description": "Location identifier",
+            "example": "k17xyz789abc123def456ghi012jkl345"
+          },
+          "locationName": {
+            "type": "string",
+            "description": "Location display name",
+            "example": "Downtown Residences"
+          },
+          "locationSlug": {
+            "type": "string",
+            "description": "Location URL-friendly identifier",
+            "example": "downtown-residences"
+          },
+          "totalCapacity": {
+            "type": "integer",
+            "description": "Total parking spaces",
+            "example": 150
+          },
+          "currentOccupancy": {
+            "type": "integer",
+            "description": "Currently occupied spaces",
+            "example": 89
+          },
+          "availableSpaces": {
+            "type": "integer",
+            "description": "Available parking spaces",
+            "example": 61
+          },
+          "occupancyRate": {
+            "type": "string",
+            "description": "Occupancy percentage",
+            "example": "59.3%"
+          },
+          "activeSessions": {
+            "type": "integer",
+            "description": "Number of active parking sessions",
+            "example": 89
+          },
+          "activeGates": {
+            "type": "integer",
+            "description": "Number of active entry/exit gates",
+            "example": 4
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of last update",
+            "example": "2024-01-20T16:30:00Z"
+          }
+        }
       }
     },
     "responses": {
@@ -1095,6 +1823,28 @@
                   "error": {
                     "code": "INTERNAL_ERROR",
                     "message": "Internal server error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "Resource conflict (e.g., duplicate company slug, location slug, or vehicle already in whitelist)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "conflict": {
+                "summary": "Resource conflict",
+                "value": {
+                  "success": false,
+                  "error": {
+                    "code": "CONFLICT_ERROR",
+                    "message": "Company slug already exists"
                   }
                 }
               }

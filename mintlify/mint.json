@@ -40,6 +40,8 @@
     {
       "group": "Guides",
       "pages": [
+        "guides/company-registration",
+        "guides/location-management",
         "guides/whitelist-management",
         "guides/error-handling",
         "guides/integration-examples"
