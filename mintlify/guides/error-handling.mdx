@@ -30,6 +30,7 @@ All API endpoints return consistent error responses with the following structure
 | `FORBIDDEN` | 403 | API key doesn't have access to requested resource |
 | `NOT_FOUND` | 404 | Resource not found |
 | `VALIDATION_ERROR` | 400 | Invalid request data |
+| `CONFLICT` | 409 | Resource conflict (duplicate company slug, location slug, vehicle) |
 | `DUPLICATE_VEHICLE` | 409 | Vehicle already exists in whitelist |
 | `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
 | `INTERNAL_ERROR` | 500 | Internal server error |
@@ -260,6 +261,100 @@ async function getLocationSafely(locationId) {
     throw error;
   }
 }
+```
+</CodeGroup>
+
+### Location Update Errors
+
+When updating locations, you may encounter specific errors:
+
+<CodeGroup>
+```json Error Response - Invalid Location for Update
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Location not found or not accessible",
+    "details": {
+      "field": "locationId",
+      "value": "invalid_location_123"
+    }
+  }
+}
+```
+
+```json Error Response - Conflict Error
+{
+  "success": false,
+  "error": {
+    "code": "CONFLICT",
+    "message": "Location slug already exists in this company"
+  }
+}
+```
+
+```json Error Response - Validation Error
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Slug must contain only lowercase letters, numbers, and hyphens"
+  }
+}
+```
+
+```javascript JavaScript Location Update Handling
+async function updateLocationSafely(locationId, updateData) {
+  try {
+    const response = await api.updateLocation(locationId, updateData);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      const errorData = error.response.data;
+      if (errorData.error?.code === 'NOT_FOUND') {
+        console.error(`Location ${locationId} not found`);
+        return null;
+      }
+    } else if (error.response?.status === 409) {
+      const errorData = error.response.data;
+      if (errorData.error?.code === 'CONFLICT') {
+        console.error('Location slug already exists in this company');
+        return { error: 'slug_conflict' };
+      }
+    } else if (error.response?.status === 400) {
+      const errorData = error.response.data;
+      if (errorData.error?.code === 'VALIDATION_ERROR') {
+        console.error('Validation error:', errorData.error.message);
+        return { error: 'validation', message: errorData.error.message };
+      }
+    }
+    throw error;
+  }
+}
+```
+
+```python Python Location Update Handling
+def update_location_safely(api, location_id, update_data):
+    try:
+        response = api.update_location(location_id, update_data)
+        return response
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            error_data = e.response.json()
+            if error_data.get('error', {}).get('code') == 'NOT_FOUND':
+                print(f"Location {location_id} not found")
+                return None
+        elif e.response.status_code == 409:
+            error_data = e.response.json()
+            if error_data.get('error', {}).get('code') == 'CONFLICT':
+                print("Location slug already exists in this company")
+                return {'error': 'slug_conflict'}
+        elif e.response.status_code == 400:
+            error_data = e.response.json()
+            if error_data.get('error', {}).get('code') == 'VALIDATION_ERROR':
+                print("Validation error:", error_data['error']['message'])
+                return {'error': 'validation', 'message': error_data['error']['message']}
+        raise
 ```
 </CodeGroup>
 

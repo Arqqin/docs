@@ -27,7 +27,159 @@ X-API-Key: YOUR_API_KEY
 
 ## API Endpoints
 
-### 1. Location Management
+### 1. Company Management
+
+#### Register Company
+**POST** `/register/company`
+
+Registers a new property management company with the system. This endpoint does not require authentication as it's used for initial company onboarding.
+
+**Request Body:**
+```json
+{
+  "companyName": "Downtown Property Management",
+  "companySlug": "downtown-pm",
+  "externalCompanyId": "EXT_12345",
+  "description": "Premium property management services in downtown area",
+  "website": "https://downtownpm.com",
+  "adminEmail": "admin@downtownpm.com",
+  "adminPassword": "SecurePassword123",
+  "adminFirstName": "John",
+  "adminLastName": "Smith",
+  "adminPhone": "+1234567890",
+  "businessAddress": "123 Business Street, Dubai",
+  "city": "Dubai",
+  "country": "UAE"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "companyId": "k17abc123def456ghi789jkl012mno345",
+    "companyName": "Downtown Property Management",
+    "companySlug": "downtown-pm",
+    "adminEmail": "admin@downtownpm.com",
+    "adminUserId": "k17def456ghi789jkl012mno345pqr678"
+  }
+}
+```
+
+**Validation Requirements:**
+- `companyName`: Required, 1-100 characters, alphanumeric with spaces and common symbols
+- `companySlug`: Required, 1-50 characters, lowercase letters, numbers, hyphens only
+- `adminEmail`: Required, valid email format, max 255 characters
+- `adminPassword`: Required, min 8 characters, must contain uppercase, lowercase, and number
+- `adminFirstName`/`adminLastName`: Required, 1-50 characters each, letters, spaces, hyphens, apostrophes
+- `businessAddress`: Required, max 200 characters
+- `country`: Required, max 50 characters
+- `adminPhone`: Optional, valid international format
+- `website`: Optional, valid URL or empty string
+- `description`: Optional, max 500 characters
+
+### 2. Location Management
+
+#### Add Location
+**POST** `/locations`
+
+Creates a new location for the authenticated company. Requires API key authentication.
+
+**Request Body:**
+```json
+{
+  "name": "Sunset Towers",
+  "slug": "sunset-towers",
+  "referenceId": "PROP_001",
+  "description": "Luxury residential complex with premium amenities",
+  "address": "456 Sunset Boulevard, Dubai Marina",
+  "city": "Dubai",
+  "state": "Dubai",
+  "country": "UAE",
+  "postalCode": "12345",
+  "coordinates": {
+    "lat": 25.0772,
+    "lng": 55.1409
+  },
+  "timezone": "Asia/Dubai",
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "k17xyz789abc123def456ghi012jkl345",
+    "companyId": "k17abc123def456ghi789jkl012mno345",
+    "name": "Sunset Towers",
+    "slug": "sunset-towers",
+    "referenceId": "PROP_001",
+    "description": "Luxury residential complex with premium amenities",
+    "address": "456 Sunset Boulevard, Dubai Marina",
+    "city": "Dubai",
+    "state": "Dubai",
+    "country": "UAE",
+    "postalCode": "12345",
+    "coordinates": {
+      "lat": 25.0772,
+      "lng": 55.1409
+    },
+    "timezone": "Asia/Dubai",
+    "settings": {},
+    "isActive": true,
+    "createdAt": 1705320000000,
+    "updatedAt": 1705320000000
+  }
+}
+```
+
+#### Update Location
+**PUT** `/locations/{locationId}`
+
+Updates an existing location's information. All fields are optional except those being updated.
+
+**Request Body:**
+```json
+{
+  "name": "Sunset Towers Residence",
+  "description": "Updated description with new amenities",
+  "coordinates": {
+    "lat": 25.0773,
+    "lng": 55.1410
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "k17xyz789abc123def456ghi012jkl345",
+    "companyId": "k17abc123def456ghi789jkl012mno345",
+    "name": "Sunset Towers Residence",
+    "slug": "sunset-towers",
+    "referenceId": "PROP_001",
+    "description": "Updated description with new amenities",
+    "address": "456 Sunset Boulevard, Dubai Marina",
+    "city": "Dubai",
+    "state": "Dubai",
+    "country": "UAE",
+    "postalCode": "12345",
+    "coordinates": {
+      "lat": 25.0773,
+      "lng": 55.1410
+    },
+    "timezone": "Asia/Dubai",
+    "settings": {},
+    "isActive": true,
+    "createdAt": 1705320000000,
+    "updatedAt": 1705323600000
+  }
+}
+```
 
 #### List Locations
 **GET** `/locations`
@@ -207,7 +359,60 @@ Updates a whitelist vehicle.
 
 ### 3. System Status
 
-#### Get Location Status
+#### Get Bulk Location Status
+**GET** `/locations/status`
+
+Returns current status and statistics for all locations accessible by the API key. This provides a company-wide overview of parking status across all managed properties.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "companyId": "k17abc123def456ghi789jkl012mno345",
+    "totalLocations": 3,
+    "locations": [
+      {
+        "locationId": "k17xyz789abc123def456ghi012jkl345",
+        "locationName": "Downtown Residences",
+        "locationSlug": "downtown-residences",
+        "totalCapacity": 150,
+        "currentOccupancy": 89,
+        "availableSpaces": 61,
+        "occupancyRate": "59.3%",
+        "activeSessions": 89,
+        "activeGates": 4,
+        "lastUpdated": "2024-01-20T16:30:00Z"
+      },
+      {
+        "locationId": "k17def456ghi789jkl012mno345pqr678",
+        "locationName": "Marina Towers",
+        "locationSlug": "marina-towers",
+        "totalCapacity": 200,
+        "currentOccupancy": 145,
+        "availableSpaces": 55,
+        "occupancyRate": "72.5%",
+        "activeSessions": 145,
+        "activeGates": 6,
+        "lastUpdated": "2024-01-20T16:30:00Z"
+      },
+      {
+        "locationId": "k17ghi789jkl012mno345pqr678stu901",
+        "locationName": "Sunset Towers",
+        "locationSlug": "sunset-towers",
+        "totalCapacity": 250,
+        "currentOccupancy": 178,
+        "availableSpaces": 72,
+        "occupancyRate": "71.2%",
+        "activeSessions": 178,
+        "activeGates": 8,
+        "lastUpdated": "2024-01-20T16:30:00Z"
+      }
+    ],
+    "lastUpdated": "2024-01-20T16:30:00Z"
+  }
+}
+```
 
 #### Get Location Status
 **GET** `/locations/{locationId}/status`
@@ -298,6 +503,78 @@ All API endpoints return consistent error responses:
 
 ## Data Models
 
+### Company
+```typescript
+interface Company {
+  companyId: string;         // Unique company identifier
+  companyName: string;       // Company display name
+  companySlug: string;       // URL-friendly company identifier
+  externalCompanyId?: string;// External system reference
+  description?: string;      // Company description
+  website?: string;         // Company website URL
+  adminEmail: string;       // Primary admin email
+  adminUserId: string;      // Admin user identifier
+  businessAddress: string;  // Company business address
+  city?: string;           // Company city
+  country: string;         // Company country
+  isActive: boolean;       // Whether company is active
+  createdAt: string;       // ISO timestamp
+  updatedAt: string;       // ISO timestamp
+}
+```
+
+### Location
+```typescript
+interface Location {
+  id: string;               // Unique location identifier
+  companyId: string;        // Parent company identifier
+  name: string;             // Location display name
+  slug: string;             // URL-friendly location identifier
+  referenceId?: string;     // External reference (property ID, etc.)
+  description?: string;     // Location description
+  address: string;          // Physical address
+  city?: string;           // City name
+  state?: string;          // State/province
+  country?: string;        // Country name
+  postalCode?: string;     // Postal/ZIP code
+  coordinates?: {           // GPS coordinates
+    lat: number;           // Latitude (-90 to 90)
+    lng: number;           // Longitude (-180 to 180)
+  };
+  timezone?: string;        // Timezone identifier (e.g., Asia/Dubai)
+  settings: any;           // Location-specific settings
+  isActive: boolean;       // Whether location is active
+  createdAt: string;       // ISO timestamp
+  updatedAt: string;       // ISO timestamp
+}
+```
+
+### LocationStatus
+```typescript
+interface LocationStatus {
+  locationId: string;       // Location identifier
+  locationName: string;     // Location display name
+  locationSlug: string;     // Location URL-friendly identifier
+  totalCapacity: number;    // Total parking spaces
+  currentOccupancy: number; // Currently occupied spaces
+  availableSpaces: number;  // Available parking spaces
+  occupancyRate: string;    // Occupancy percentage (e.g., "59.3%")
+  activeSessions: number;   // Number of active parking sessions
+  activeGates: number;      // Number of active entry/exit gates
+  lastUpdated: string;      // ISO timestamp of last update
+}
+```
+
+### BulkLocationStatus
+```typescript
+interface BulkLocationStatus {
+  companyId: string;        // Company identifier
+  totalLocations: number;   // Total number of locations
+  locations: LocationStatus[]; // Array of location statuses
+  lastUpdated: string;      // ISO timestamp of last update
+}
+```
+
 ### WhitelistVehicle
 ```typescript
 interface WhitelistVehicle {
@@ -339,6 +616,21 @@ class ArqqinParkingAPI {
     });
   }
 
+  // Register a new company (no authentication required)
+  static async registerCompany(companyData, baseURL) {
+    try {
+      const client = axios.create({
+        baseURL,
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const response = await client.post('/register/company', companyData);
+      return response.data;
+    } catch (error) {
+      console.error('Error registering company:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
   // List all locations
   async getLocations() {
     try {
@@ -346,6 +638,39 @@ class ArqqinParkingAPI {
       return response.data;
     } catch (error) {
       console.error('Error fetching locations:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Add a new location
+  async addLocation(locationData) {
+    try {
+      const response = await this.client.post('/locations', locationData);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding location:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Update a location
+  async updateLocation(locationId, updateData) {
+    try {
+      const response = await this.client.put(`/locations/${locationId}`, updateData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating location:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // Get bulk location status for all company locations
+  async getBulkLocationStatus() {
+    try {
+      const response = await this.client.get('/locations/status');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching bulk location status:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -402,8 +727,42 @@ class ArqqinParkingAPI {
   }
 }
 
-// Usage example
+// Usage examples
+
+// 1. Register a new company (no authentication required)
+ArqqinParkingAPI.registerCompany({
+  companyName: "Downtown Property Management",
+  companySlug: "downtown-pm",
+  adminEmail: "admin@downtownpm.com",
+  adminPassword: "SecurePassword123",
+  adminFirstName: "John",
+  adminLastName: "Smith",
+  businessAddress: "123 Business Street, Dubai",
+  country: "UAE"
+}, 'https://apistg.arqq.in/api/')
+  .then(result => console.log('Company registered:', result))
+  .catch(error => console.error('Error:', error));
+
+// 2. Use authenticated API instance
 const api = new ArqqinParkingAPI('your-api-key', 'https://apistg.arqq.in/api/');
+
+// Add a new location
+api.addLocation({
+  name: "Sunset Towers",
+  slug: "sunset-towers",
+  address: "456 Sunset Boulevard, Dubai Marina",
+  city: "Dubai",
+  country: "UAE",
+  coordinates: { lat: 25.0772, lng: 55.1409 },
+  settings: { parkingCapacity: 200 }
+})
+  .then(result => console.log('Location added:', result))
+  .catch(error => console.error('Error:', error));
+
+// Get bulk status for all locations
+api.getBulkLocationStatus()
+  .then(result => console.log('Bulk status:', result))
+  .catch(error => console.error('Error:', error));
 
 // List whitelist vehicles for a reference
 api.listWhitelist('location_123', { referenceId: 'REF_001' })
@@ -449,9 +808,38 @@ class ArqqinParkingAPI:
                 print(f"Response: {e.response.text}")
             raise
 
+    @staticmethod
+    def register_company(company_data: Dict[str, Any], base_url: str) -> Dict[str, Any]:
+        """Register a new company (no authentication required)"""
+        headers = {'Content-Type': 'application/json'}
+        url = f"{base_url}/register/company"
+
+        try:
+            response = requests.post(url, headers=headers, json=company_data)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Company registration failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response: {e.response.text}")
+            raise
+
     def get_locations(self) -> Dict[str, Any]:
         """Get all accessible locations"""
         return self._make_request('GET', '/locations')
+
+    def add_location(self, location_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Add a new location"""
+        return self._make_request('POST', '/locations', location_data)
+
+    def update_location(self, location_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a location"""
+        endpoint = f"/locations/{location_id}"
+        return self._make_request('PUT', endpoint, update_data)
+
+    def get_bulk_location_status(self) -> Dict[str, Any]:
+        """Get bulk location status for all company locations"""
+        return self._make_request('GET', '/locations/status')
 
     def list_whitelist(self, location_id: str, 
                         reference_id: Optional[str] = None,
@@ -493,8 +881,49 @@ class ArqqinParkingAPI:
         endpoint = f"/locations/{location_id}/whitelist/{whitelist_id}"
         return self._make_request('DELETE', endpoint)
 
-# Usage example
+# Usage examples
+
+# 1. Register a new company (no authentication required)
+try:
+    company_data = {
+        "companyName": "Downtown Property Management",
+        "companySlug": "downtown-pm",
+        "adminEmail": "admin@downtownpm.com",
+        "adminPassword": "SecurePassword123",
+        "adminFirstName": "John",
+        "adminLastName": "Smith",
+        "businessAddress": "123 Business Street, Dubai",
+        "country": "UAE"
+    }
+    result = ArqqinParkingAPI.register_company(company_data, 'https://apistg.arqq.in/api/')
+    print("Company registered:", result)
+except Exception as e:
+    print(f"Error: {e}")
+
+# 2. Use authenticated API instance
 api = ArqqinParkingAPI('your-api-key', 'https://apistg.arqq.in/api/')
+
+# Add a new location
+try:
+    location_data = {
+        "name": "Sunset Towers",
+        "slug": "sunset-towers",
+        "address": "456 Sunset Boulevard, Dubai Marina",
+        "city": "Dubai",
+        "country": "UAE",
+        "coordinates": {"lat": 25.0772, "lng": 55.1409},
+    }
+    result = api.add_location(location_data)
+    print("Location added:", result)
+except Exception as e:
+    print(f"Error: {e}")
+
+# Get bulk status for all locations
+try:
+    result = api.get_bulk_location_status()
+    print("Bulk status:", result)
+except Exception as e:
+    print(f"Error: {e}")
 
 # List whitelist for a reference
 try:
@@ -516,6 +945,16 @@ except Exception as e:
 
 ## Changelog
 
+### Version 1.4.0 (2025-09-16)
+- **NEW**: Company registration endpoint (`POST /register/company`) for onboarding new property management companies
+- **NEW**: Location management endpoints:
+  - `POST /locations` - Add new locations to company portfolio
+  - `PUT /locations/{locationId}` - Update existing location details
+- **NEW**: Bulk location status endpoint (`GET /locations/status`) for company-wide parking overview
+- **ENHANCED**: Complete data models documentation for Company, Location, and Status interfaces
+- **ENHANCED**: Updated integration examples with new endpoint usage patterns
+- **ENHANCED**: Comprehensive validation rules and error handling documentation
+
 ### Version 1.3.0 (2025-09-03)
 - Replace resident-specific endpoints with generic whitelist vehicle management
 - Introduce `referenceId` to group vehicles under any external entity
@@ -529,4 +968,4 @@ except Exception as e:
 
 ---
 
-*This document is version 1.3.0 and was last updated on September 02, 2025.*
+*This document is version 1.4.0 and was last updated on September 16, 2025.*
