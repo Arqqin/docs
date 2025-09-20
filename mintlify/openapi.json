@@ -1750,6 +1750,107 @@
             "example": "2024-01-20T16:30:00Z"
           }
         }
+      },
+      "CompaniesListResponse": {
+        "type": "object",
+        "description": "Response containing a list of companies accessible by the API key",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Company"
+            }
+          }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "required": ["_id", "name", "slug", "isActive", "createdAt", "updatedAt"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique company identifier",
+            "example": "k17abc123def456ghi789jkl012mno345"
+          },
+          "name": {
+            "type": "string",
+            "description": "Company name",
+            "example": "Downtown Property Management"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly company identifier",
+            "example": "downtown-pm"
+          },
+          "externalCompanyId": {
+            "type": "string",
+            "description": "External system reference ID",
+            "example": "EXT_12345"
+          },
+          "description": {
+            "type": "string",
+            "description": "Company description",
+            "example": "Premium property management services"
+          },
+          "address": {
+            "type": "string",
+            "description": "Company business address",
+            "example": "123 Business Street, Dubai"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Company phone number",
+            "example": "+1234567890"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Company email address",
+            "example": "contact@downtownpm.com"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "description": "Company website URL",
+            "example": "https://downtownpm.com"
+          },
+          "logo": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to company logo image",
+            "example": "https://storage.example.com/logo.png"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the company is active",
+            "example": true
+          },
+          "settings": {
+            "type": "object",
+            "description": "Company-specific settings",
+            "example": {}
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "User ID who created the company",
+            "example": "k17user123def456ghi789jkl012mno345"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix timestamp when company was created",
+            "example": 1705320000000
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix timestamp when company was last updated",
+            "example": 1705320000000
+          }
+        }
       }
     },
     "responses": {
@@ -1908,106 +2009,6 @@
                 }
               }
             }
-          }
-        }
-      },
-      "CompaniesListResponse": {
-        "type": "object",
-        "required": ["success", "data"],
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Company"
-            }
-          }
-        }
-      },
-      "Company": {
-        "type": "object",
-        "required": ["_id", "name", "slug", "isActive", "createdAt", "updatedAt"],
-        "properties": {
-          "_id": {
-            "type": "string",
-            "description": "Unique company identifier",
-            "example": "k17abc123def456ghi789jkl012mno345"
-          },
-          "name": {
-            "type": "string",
-            "description": "Company name",
-            "example": "Downtown Property Management"
-          },
-          "slug": {
-            "type": "string",
-            "description": "URL-friendly company identifier",
-            "example": "downtown-pm"
-          },
-          "externalCompanyId": {
-            "type": "string",
-            "description": "External system reference ID",
-            "example": "EXT_12345"
-          },
-          "description": {
-            "type": "string",
-            "description": "Company description",
-            "example": "Premium property management services"
-          },
-          "address": {
-            "type": "string",
-            "description": "Company business address",
-            "example": "123 Business Street, Dubai"
-          },
-          "phone": {
-            "type": "string",
-            "description": "Company phone number",
-            "example": "+1234567890"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "Company email address",
-            "example": "contact@downtownpm.com"
-          },
-          "website": {
-            "type": "string",
-            "format": "uri",
-            "description": "Company website URL",
-            "example": "https://downtownpm.com"
-          },
-          "logo": {
-            "type": "string",
-            "format": "uri",
-            "description": "URL to company logo image",
-            "example": "https://storage.example.com/logo.png"
-          },
-          "isActive": {
-            "type": "boolean",
-            "description": "Whether the company is active",
-            "example": true
-          },
-          "settings": {
-            "type": "object",
-            "description": "Company-specific settings",
-            "example": {}
-          },
-          "createdBy": {
-            "type": "string",
-            "description": "User ID who created the company",
-            "example": "k17user123def456ghi789jkl012mno345"
-          },
-          "createdAt": {
-            "type": "number",
-            "description": "Unix timestamp when company was created",
-            "example": 1705320000000
-          },
-          "updatedAt": {
-            "type": "number",
-            "description": "Unix timestamp when company was last updated",
-            "example": 1705320000000
           }
         }
       }
