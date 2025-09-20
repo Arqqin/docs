@@ -86,7 +86,59 @@ You should receive a response like:
 ```
 </Check>
 
-## Step 2: List Available Locations
+## Step 2: List Your Companies
+
+First, discover the companies you have access to:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/companies" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+async function getCompanies() {
+  try {
+    const response = await fetch(`${BASE_URL}/companies`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+    console.log('Companies:', data.data);
+    return data.data[0]; // Return first company for next step
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+const company = await getCompanies();
+```
+
+```python Python
+def get_companies():
+    headers = {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        response = requests.get(f'{BASE_URL}/companies', headers=headers)
+        response.raise_for_status()
+        companies = response.json()['data']
+        print('Companies:', companies)
+        return companies[0]  # Return first company for next step
+    except requests.exceptions.RequestException as e:
+        print('Error:', e)
+
+company = get_companies()
+```
+</CodeGroup>
+
+## Step 3: List Available Locations
 
 Discover the locations you have access to:
 
@@ -106,7 +158,7 @@ async function getLocations() {
         'Content-Type': 'application/json'
       }
     });
-    
+
     const data = await response.json();
     console.log('Locations:', data.data);
     return data.data[0]; // Return first location for next step
@@ -124,7 +176,7 @@ def get_locations():
         'X-API-Key': API_KEY,
         'Content-Type': 'application/json'
     }
-    
+
     try:
         response = requests.get(f'{BASE_URL}/locations', headers=headers)
         response.raise_for_status()
@@ -138,7 +190,7 @@ location = get_locations()
 ```
 </CodeGroup>
 
-## Step 3: Add a Vehicle to Whitelist
+## Step 4: Add a Vehicle to Whitelist
 
 Now let's add a vehicle to the whitelist. Replace `location_123` with your actual location ID:
 
@@ -222,7 +274,7 @@ vehicle_id = add_vehicle(location['id'])
 ```
 </CodeGroup>
 
-## Step 4: List Whitelist Vehicles
+## Step 5: List Whitelist Vehicles
 
 Verify your vehicle was added by listing all whitelist vehicles:
 
@@ -275,7 +327,7 @@ list_whitelist(location['id'])
 ```
 </CodeGroup>
 
-## Step 5: Get Location Status
+## Step 6: Get Location Status
 
 Check the current parking status of your location:
 

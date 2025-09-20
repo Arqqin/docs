@@ -15,25 +15,26 @@ This API is designed for integration with property management systems, residenti
 
 <CardGroup cols={2}>
   <Card title="Vehicle Whitelist Management" icon="car">
-    Add, update, and remove vehicles from location-specific whitelists with full CRUD operations.
+    Add, update, and remove vehicles from location-specific whitelists with full CRUD operations and flexible filtering.
+  </Card>
+  <Card title="Company & Location Management" icon="building">
+    Multi-tenant architecture supporting company registration, location management, and hierarchical access control.
   </Card>
   <Card title="Reference-Based Architecture" icon="link">
     Group vehicles under any external entity using generic reference IDs (residents, contracts, units, fleets).
   </Card>
-  <Card title="Location Management" icon="map-pin">
-    Manage multiple parking locations with detailed information and real-time status.
-  </Card>
-  <Card title="Real-Time Status" icon="chart-line">
-    Get live parking occupancy data, gate status, and capacity information.
+  <Card title="Comprehensive Status Monitoring" icon="chart-line">
+    Live parking occupancy data, gate status, capacity information, and bulk location status reporting.
   </Card>
 </CardGroup>
 
 ## System Architecture
 
-The API follows a clean, reference-based architecture:
+The API follows a comprehensive multi-tenant architecture:
 
-- **API Keys**: Scoped to specific locations for security
-- **Vehicle Whitelists**: Managed per location with flexible filtering
+- **Multi-Tenant Companies**: Hierarchical company and location management with role-based access
+- **Secure Access**: API key-based authentication with appropriate permissions for your use case
+- **Vehicle Whitelists**: Managed per location with flexible filtering and reference-based grouping
 - **Reference IDs**: Generic identifiers to group vehicles under any external entity (no PII required)
 
 <Accordion title="Why Reference-Based Architecture?">
@@ -74,11 +75,14 @@ Keep your API keys secure and never expose them in client-side code. Contact hel
 
 ## Quick Start
 
-Get started with the API in three simple steps:
+Get started with the API in four simple steps:
 
 <Steps>
+  <Step title="Register Your Company">
+    Use the `/register/company` endpoint to register your organization and get started with the platform.
+  </Step>
   <Step title="Get Your API Key">
-    Contact our support team at hello@arqqin.com to obtain your API key. API keys are scoped to specific locations for security.
+    Contact our support team at hello@arqqin.com to obtain your API key with appropriate permissions for your use case.
   </Step>
   <Step title="Explore Locations">
     Use the `/locations` endpoint to discover available parking locations and their details.
@@ -91,12 +95,16 @@ Get started with the API in three simple steps:
 ## What's Next?
 
 <CardGroup cols={2}>
+  <Card title="Company Registration" icon="building" href="/guides/company-registration">
+    Register your organization and get started with the platform.
+  </Card>
   <Card title="Authentication Guide" icon="key" href="/authentication">
     Learn about API key authentication and security best practices.
   </Card>
   <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
     Get up and running with your first API calls in minutes.
   </Card>
+
   <Card title="Whitelist Management" icon="list-check" href="/guides/whitelist-management">
     Comprehensive guide to managing vehicle whitelists.
   </Card>

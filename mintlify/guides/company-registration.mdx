@@ -5,10 +5,10 @@ description: "Learn how to register your property management company with the Ar
 
 ## Overview
 
-The company registration endpoint allows property management companies to onboard themselves to the Arqqin platform. This is typically the first step before you can start managing locations and vehicle whitelists.
+The company registration endpoint allows property management companies to onboard themselves to the Arqqin platform. This creates a company record in the system and is typically the first step before you can start managing locations and vehicle whitelists.
 
 <Note>
-Company registration does not require authentication - it's a public endpoint for initial onboarding.
+Company registration requires an API key for authentication. Contact hello@arqqin.com to obtain a registration API key.
 </Note>
 
 ## Registration Process
@@ -18,33 +18,37 @@ Company registration does not require authentication - it's a public endpoint fo
 Gather the following required information:
 
 - **Company details**: Name, slug, business address
-- **Admin user details**: Email, password, first name, last name
-- **Location information**: Country where you operate
+- **Optional details**: External company ID, description, contact information, logo
+- **Settings**: Company-specific configuration (optional)
 
 ### Step 2: Register Your Company
 
 <CodeGroup>
 ```bash cURL
 curl -X POST "https://apistg.arqq.in/api/register/company" \
+  -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "companyName": "Downtown Property Management",
-    "companySlug": "downtown-pm",
-    "adminEmail": "admin@downtownpm.com",
-    "adminPassword": "SecurePassword123",
-    "adminFirstName": "John",
-    "adminLastName": "Smith",
-    "businessAddress": "123 Business Street, Dubai",
-    "country": "UAE"
+    "name": "Downtown Property Management",
+    "slug": "downtown-pm",
+    "externalCompanyId": "EXT_12345",
+    "description": "Premium property management services",
+    "address": "123 Business Street, Dubai",
+    "phone": "+1234567890",
+    "email": "contact@downtownpm.com",
+    "website": "https://downtownpm.com",
+    "logo": "https://storage.example.com/logo.png",
+    "settings": {}
   }'
 ```
 
 ```javascript JavaScript
-async function registerCompany(companyData) {
+async function registerCompany(companyData, apiKey) {
   try {
     const response = await fetch('https://apistg.arqq.in/api/register/company', {
       method: 'POST',
       headers: {
+        'X-API-Key': apiKey,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(companyData)
@@ -63,17 +67,19 @@ async function registerCompany(companyData) {
 
 // Example usage
 const companyData = {
-  companyName: "Downtown Property Management",
-  companySlug: "downtown-pm",
-  adminEmail: "admin@downtownpm.com",
-  adminPassword: "SecurePassword123",
-  adminFirstName: "John",
-  adminLastName: "Smith",
-  businessAddress: "123 Business Street, Dubai",
-  country: "UAE"
+  name: "Downtown Property Management",
+  slug: "downtown-pm",
+  externalCompanyId: "EXT_12345",
+  description: "Premium property management services",
+  address: "123 Business Street, Dubai",
+  phone: "+1234567890",
+  email: "contact@downtownpm.com",
+  website: "https://downtownpm.com",
+  logo: "https://storage.example.com/logo.png",
+  settings: {}
 };
 
-registerCompany(companyData)
+registerCompany(companyData, 'YOUR_API_KEY')
   .then(result => console.log('Company registered:', result))
   .catch(error => console.error('Registration failed:', error));
 ```
@@ -81,10 +87,13 @@ registerCompany(companyData)
 ```python Python
 import requests
 
-def register_company(company_data):
+def register_company(company_data, api_key):
     """Register a new company with the Arqqin platform"""
     url = "https://apistg.arqq.in/api/register/company"
-    headers = {'Content-Type': 'application/json'}
+    headers = {
+        'X-API-Key': api_key,
+        'Content-Type': 'application/json'
+    }
 
     try:
         response = requests.post(url, headers=headers, json=company_data)
@@ -98,18 +107,20 @@ def register_company(company_data):
 
 # Example usage
 company_data = {
-    "companyName": "Downtown Property Management",
-    "companySlug": "downtown-pm",
-    "adminEmail": "admin@downtownpm.com",
-    "adminPassword": "SecurePassword123",
-    "adminFirstName": "John",
-    "adminLastName": "Smith",
-    "businessAddress": "123 Business Street, Dubai",
-    "country": "UAE"
+    "name": "Downtown Property Management",
+    "slug": "downtown-pm",
+    "externalCompanyId": "EXT_12345",
+    "description": "Premium property management services",
+    "address": "123 Business Street, Dubai",
+    "phone": "+1234567890",
+    "email": "contact@downtownpm.com",
+    "website": "https://downtownpm.com",
+    "logo": "https://storage.example.com/logo.png",
+    "settings": {}
 }
 
 try:
-    result = register_company(company_data)
+    result = register_company(company_data, 'YOUR_API_KEY')
     print("Company registered successfully:", result)
 except Exception as e:
     print("Registration failed:", e)
@@ -123,70 +134,85 @@ After successful registration, you'll receive confirmation with your company det
 ```json
 {
   "success": true,
+  "message": "Company created successfully",
   "data": {
-    "companyId": "k17abc123def456ghi789jkl012mno345",
-    "companyName": "Downtown Property Management",
-    "companySlug": "downtown-pm",
-    "adminEmail": "admin@downtownpm.com",
-    "adminUserId": "k17def456ghi789jkl012mno345pqr678"
+    "companyId": "k17abc123def456ghi789jkl012mno345"
   }
 }
 ```
 
 <Note>
-After registration, contact hello@arqqin.com to obtain your API key for accessing the management endpoints.
+After registration, you can use the `/companies` endpoint to list your registered companies and begin adding locations.
 </Note>
 
 ## Required Fields
 
-<ResponseField name="companyName" type="string" required>
-  Your company's display name (1-100 characters)
+<ResponseField name="name" type="string" required>
+  Your company's display name (1-100 characters, alphanumeric with spaces and common symbols)
 </ResponseField>
 
-<ResponseField name="companySlug" type="string" required>
+<ResponseField name="slug" type="string" required>
   URL-friendly company identifier (lowercase letters, numbers, hyphens only, 1-50 characters)
 </ResponseField>
 
-<ResponseField name="adminEmail" type="string" required>
-  Email address for the admin user (must be valid email format)
-</ResponseField>
-
-<ResponseField name="adminPassword" type="string" required>
-  Password for the admin user (minimum 8 characters)
-</ResponseField>
-
-<ResponseField name="adminFirstName" type="string" required>
-  Admin user's first name (1-50 characters)
-</ResponseField>
-
-<ResponseField name="adminLastName" type="string" required>
-  Admin user's last name (1-50 characters)
-</ResponseField>
-
-<ResponseField name="businessAddress" type="string" required>
+<ResponseField name="address" type="string" required>
   Your company's business address (1-200 characters)
 </ResponseField>
 
-<ResponseField name="country" type="string" required>
-  Country where your company operates (1-50 characters)
+## Optional Fields
+
+<ResponseField name="externalCompanyId" type="string">
+  External system reference ID (max 50 characters)
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Company description (max 500 characters)
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  Company phone number (max 20 characters)
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Company email address (must be valid email format or empty string)
+</ResponseField>
+
+<ResponseField name="website" type="string">
+  Company website URL (must be valid URL or empty string)
+</ResponseField>
+
+<ResponseField name="logo" type="string">
+  Company logo URL (must be valid URL or empty string)
+</ResponseField>
+
+<ResponseField name="settings" type="object">
+  Company-specific settings (optional object)
 </ResponseField>
 
 ## Validation Rules
 
+### Company Name Format
+- Must contain only alphanumeric characters, spaces, and common symbols: `-&.,()`
+- Must be between 1-100 characters
+- Cannot be empty or only whitespace
+
 ### Company Slug Format
 - Must contain only lowercase letters, numbers, and hyphens
 - Cannot start or end with a hyphen
+- Cannot contain consecutive hyphens (`--`)
 - Must be between 1-50 characters
 - Must be unique across all companies
 
-### Email Validation
-- Must be a valid email format
-- Will be used for admin user authentication
-- Must be unique (cannot register with an existing email)
+### Address Requirements
+- Must be between 1-200 characters
+- Cannot be empty or only whitespace
 
-### Password Requirements
-- Minimum 8 characters
-- Should include a mix of letters, numbers, and special characters for security
+### Optional Field Validation
+- **Email**: Must be valid email format or empty string
+- **Website/Logo**: Must be valid URL format or empty string
+- **Phone**: Maximum 20 characters
+- **Description**: Maximum 500 characters
+- **External Company ID**: Maximum 50 characters
 
 ## Common Errors
 
@@ -196,7 +222,7 @@ After registration, contact hello@arqqin.com to obtain your API key for accessin
 {
   "success": false,
   "error": {
-    "code": "CONFLICT",
+    "code": "CONFLICT_ERROR",
     "message": "Company slug already exists"
   }
 }
@@ -204,33 +230,33 @@ After registration, contact hello@arqqin.com to obtain your API key for accessin
 
 **Solution**: Choose a different company slug that's unique.
 
-### Invalid Email Format
+### Invalid Company Name
 
 ```json
 {
   "success": false,
   "error": {
     "code": "VALIDATION_ERROR",
-    "message": "Invalid email format"
+    "message": "Company name contains invalid characters"
   }
 }
 ```
 
-**Solution**: Ensure the email address follows standard email format (user@domain.com).
+**Solution**: Ensure the company name only contains alphanumeric characters, spaces, and allowed symbols.
 
-### Email Already Registered
+### Invalid Address
 
 ```json
 {
   "success": false,
   "error": {
-    "code": "CONFLICT",
-    "message": "Email already registered"
+    "code": "VALIDATION_ERROR",
+    "message": "Business address is required"
   }
 }
 ```
 
-**Solution**: Use a different email address or contact support if you believe this is an error.
+**Solution**: Provide a valid business address between 1-200 characters.
 
 ### Invalid Slug Format
 
@@ -324,10 +350,9 @@ def register_company_with_error_handling(company_data):
 
 After successful company registration:
 
-1. **Contact Support** - Email hello@arqqin.com to obtain your API key for the management endpoints
-2. **Add your first location** - Use the [Location Management](/guides/location-management) guide
-3. **Set up vehicle whitelists** - Follow the [Whitelist Management](/guides/whitelist-management) guide
-4. **Integrate with your system** - Check out [Integration Examples](/guides/integration-examples)
+1. **Add your first location** - Use the [Location Management](/guides/location-management) guide
+2. **Set up vehicle whitelists** - Follow the [Whitelist Management](/guides/whitelist-management) guide
+3. **Integrate with your system** - Check out [Integration Examples](/guides/integration-examples)
 
 ## Testing Your Registration
 

@@ -48,19 +48,16 @@
                 "complete": {
                   "summary": "Complete company registration",
                   "value": {
-                    "companyName": "Downtown Property Management",
-                    "companySlug": "downtown-pm",
+                    "name": "Downtown Property Management",
+                    "slug": "downtown-pm",
                     "externalCompanyId": "EXT_12345",
                     "description": "Premium property management services",
+                    "address": "123 Business Street, Dubai",
+                    "phone": "+1234567890",
+                    "email": "contact@downtownpm.com",
                     "website": "https://downtownpm.com",
-                    "adminEmail": "admin@downtownpm.com",
-                    "adminPassword": "SecurePassword123",
-                    "adminFirstName": "John",
-                    "adminLastName": "Smith",
-                    "adminPhone": "+1234567890",
-                    "businessAddress": "123 Business Street, Dubai",
-                    "city": "Dubai",
-                    "country": "UAE"
+                    "logo": "https://storage.example.com/logo.png",
+                    "settings": {}
                   }
                 }
               }
@@ -727,6 +724,95 @@
           }
         }
       }
+    },
+    "/companies": {
+      "get": {
+        "tags": ["Company Management"],
+        "summary": "List Companies",
+        "description": "Returns all companies accessible by the API key based on the permissions granted.",
+        "operationId": "listCompanies",
+        "responses": {
+          "200": {
+            "description": "List of accessible companies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompaniesListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
+    "/test": {
+      "get": {
+        "tags": ["Development"],
+        "summary": "Test Endpoint",
+        "description": "Development endpoint that returns sample data for testing purposes. Supports both XML and JSON formats.",
+        "operationId": "testEndpoint",
+        "security": [],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Format of test data to return",
+            "schema": {
+              "type": "string",
+              "enum": ["json", "xml"],
+              "default": "json",
+              "example": "json"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sample test data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Test data"
+                    }
+                  }
+                },
+                "examples": {
+                  "sample_json": {
+                    "summary": "Sample JSON test data",
+                    "value": {
+                      "message": "Test data for development",
+                      "timestamp": "2025-01-20T10:30:00+04:00",
+                      "status": "success"
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "xml"
+                },
+                "examples": {
+                  "sample_xml": {
+                    "summary": "Sample XML test data",
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testData>\n  <message>Test data for development</message>\n  <timestamp>2025-01-20T10:30:00+04:00</timestamp>\n  <status>success</status>\n</testData>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1191,9 +1277,9 @@
       },
       "CompanyRegistrationRequest": {
         "type": "object",
-        "required": ["companyName", "companySlug", "adminEmail", "adminPassword", "adminFirstName", "adminLastName", "businessAddress", "country"],
+        "required": ["name", "slug", "address"],
         "properties": {
-          "companyName": {
+          "name": {
             "type": "string",
             "minLength": 1,
             "maxLength": 100,
@@ -1201,88 +1287,61 @@
             "description": "Company name (1-100 characters, alphanumeric with spaces and common symbols)",
             "example": "Downtown Property Management"
           },
-          "companySlug": {
+          "slug": {
             "type": "string",
             "minLength": 1,
             "maxLength": 50,
             "pattern": "^[a-z0-9-]+$",
-            "description": "URL-friendly company identifier (lowercase letters, numbers, hyphens only)",
+            "description": "URL-friendly company identifier (lowercase letters, numbers, hyphens only). Cannot start/end with hyphens or contain consecutive hyphens.",
             "example": "downtown-pm"
           },
           "externalCompanyId": {
             "type": "string",
-            "description": "External system reference ID",
+            "maxLength": 50,
+            "description": "External system reference ID (optional, max 50 characters)",
             "example": "EXT_12345"
           },
           "description": {
             "type": "string",
             "maxLength": 500,
-            "description": "Company description (max 500 characters)",
+            "description": "Company description (optional, max 500 characters)",
             "example": "Premium property management services"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Company business address (required, max 200 characters)",
+            "example": "123 Business Street, Dubai"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "Company phone number (optional, max 20 characters)",
+            "example": "+1234567890"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Company email address (optional, must be valid email or empty string)",
+            "example": "contact@downtownpm.com"
           },
           "website": {
             "type": "string",
             "format": "uri",
-            "description": "Company website URL",
+            "description": "Company website URL (optional, must be valid URL or empty string)",
             "example": "https://downtownpm.com"
           },
-          "adminEmail": {
+          "logo": {
             "type": "string",
-            "format": "email",
-            "maxLength": 255,
-            "description": "Primary admin email address",
-            "example": "admin@downtownpm.com"
+            "format": "uri",
+            "description": "Company logo URL (optional, must be valid URL or empty string)",
+            "example": "https://storage.example.com/logo.png"
           },
-          "adminPassword": {
-            "type": "string",
-            "minLength": 8,
-            "maxLength": 128,
-            "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)",
-            "description": "Admin password (min 8 chars, must contain uppercase, lowercase, and number)",
-            "example": "SecurePassword123"
-          },
-          "adminFirstName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 50,
-            "pattern": "^[a-zA-Z\\s\\-']+$",
-            "description": "Admin first name",
-            "example": "John"
-          },
-          "adminLastName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 50,
-            "pattern": "^[a-zA-Z\\s\\-']+$",
-            "description": "Admin last name",
-            "example": "Smith"
-          },
-          "adminPhone": {
-            "type": "string",
-            "pattern": "^\\+?[1-9]\\d{1,14}$",
-            "description": "Admin phone number (valid international format)",
-            "example": "+1234567890"
-          },
-          "businessAddress": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200,
-            "description": "Company business address",
-            "example": "123 Business Street, Dubai"
-          },
-          "city": {
-            "type": "string",
-            "maxLength": 50,
-            "description": "City name",
-            "example": "Dubai"
-          },
-          "country": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 50,
-            "pattern": "^[a-zA-Z\\s]+$",
-            "description": "Country name",
-            "example": "UAE"
+          "settings": {
+            "type": "object",
+            "description": "Company-specific settings (optional)",
+            "example": {}
           }
         }
       },
@@ -1849,6 +1908,106 @@
                 }
               }
             }
+          }
+        }
+      },
+      "CompaniesListResponse": {
+        "type": "object",
+        "required": ["success", "data"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Company"
+            }
+          }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "required": ["_id", "name", "slug", "isActive", "createdAt", "updatedAt"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique company identifier",
+            "example": "k17abc123def456ghi789jkl012mno345"
+          },
+          "name": {
+            "type": "string",
+            "description": "Company name",
+            "example": "Downtown Property Management"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly company identifier",
+            "example": "downtown-pm"
+          },
+          "externalCompanyId": {
+            "type": "string",
+            "description": "External system reference ID",
+            "example": "EXT_12345"
+          },
+          "description": {
+            "type": "string",
+            "description": "Company description",
+            "example": "Premium property management services"
+          },
+          "address": {
+            "type": "string",
+            "description": "Company business address",
+            "example": "123 Business Street, Dubai"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Company phone number",
+            "example": "+1234567890"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Company email address",
+            "example": "contact@downtownpm.com"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "description": "Company website URL",
+            "example": "https://downtownpm.com"
+          },
+          "logo": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to company logo image",
+            "example": "https://storage.example.com/logo.png"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the company is active",
+            "example": true
+          },
+          "settings": {
+            "type": "object",
+            "description": "Company-specific settings",
+            "example": {}
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "User ID who created the company",
+            "example": "k17user123def456ghi789jkl012mno345"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix timestamp when company was created",
+            "example": 1705320000000
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix timestamp when company was last updated",
+            "example": 1705320000000
           }
         }
       }
