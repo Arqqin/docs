@@ -1,0 +1,306 @@
+{
+  "info": {
+    "name": "Arqqin API Collection",
+    "description": "Complete API collection for the Arqqin Parking Management Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://apistg.arqq.in/api",
+      "description": "API base URL"
+    },
+    {
+      "key": "api_key",
+      "value": "{{api_key}}",
+      "description": "Your API key"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Company Management",
+      "item": [
+        {
+          "name": "Register Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Property Management\",\n  \"slug\": \"downtown-pm\",\n  \"externalCompanyId\": \"EXT_12345\",\n  \"description\": \"Premium property management services\",\n  \"address\": \"123 Business Street, Dubai\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"contact@downtownpm.com\",\n  \"website\": \"https://downtownpm.com\",\n  \"logo\": \"https://storage.example.com/logo.png\",\n  \"settings\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register/company",
+              "host": ["{{base_url}}"],
+              "path": ["register", "company"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/companies",
+              "host": ["{{base_url}}"],
+              "path": ["companies"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "List Locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/locations",
+              "host": ["{{base_url}}"],
+              "path": ["locations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sunset Towers\",\n  \"slug\": \"sunset-towers\",\n  \"referenceId\": \"PROP_001\",\n  \"description\": \"Luxury residential complex with premium amenities\",\n  \"address\": \"456 Sunset Boulevard, Dubai Marina\",\n  \"city\": \"Dubai\",\n  \"state\": \"Dubai\",\n  \"country\": \"UAE\",\n  \"postalCode\": \"12345\",\n  \"coordinates\": {\n    \"lat\": 25.0772,\n    \"lng\": 55.1409\n  },\n  \"timezone\": \"Asia/Dubai\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/locations",
+              "host": ["{{base_url}}"],
+              "path": ["locations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Location Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sunset Towers Updated\",\n  \"address\": \"456 Sunset Boulevard (New Wing), Dubai Marina\",\n  \"city\": \"Dubai\",\n  \"country\": \"UAE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Location Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Bulk Location Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/locations/status",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Whitelist Management",
+      "item": [
+        {
+          "name": "List Whitelist Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}/whitelist?limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}", "whitelist"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Whitelist Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referenceId\": \"REF_001\",\n  \"plateType\": \"DXB\",\n  \"plateCode\": \"White\",\n  \"plateNumber\": \"67890\",\n  \"vehicleType\": \"SUV\",\n  \"note\": \"Second vehicle\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}/whitelist",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}", "whitelist"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Whitelist Vehicle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referenceId\": \"REF_001\",\n  \"plateType\": \"DXB\",\n  \"plateCode\": \"A\",\n  \"plateNumber\": \"67890\",\n  \"vehicleType\": \"SUV\",\n  \"note\": \"Updated notes\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}/whitelist/{{whitelist_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}", "whitelist", "{{whitelist_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Whitelist Vehicle",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/locations/{{location_id}}/whitelist/{{whitelist_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["locations", "{{location_id}}", "whitelist", "{{whitelist_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Development",
+      "item": [
+        {
+          "name": "Test Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/test?type=json",
+              "host": ["{{base_url}}"],
+              "path": ["test"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

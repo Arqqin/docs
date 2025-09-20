@@ -1,0 +1,108 @@
+---
+title: "API Tools & Downloads"
+description: "Download Postman collections, view API specifications, and access developer tools for the Arqqin API"
+---
+
+import { Card, CardGroup } from 'mintlify/components';
+
+# API Tools & Downloads
+
+Access developer tools and resources to help you integrate with the Arqqin API more efficiently.
+
+<CardGroup cols={2}>
+  <Card
+    title="Postman Collection"
+    icon="download"
+    href="/postman-collection.json"
+  >
+    Import our complete API collection into Postman to test endpoints quickly
+  </Card>
+  
+  <Card
+    title="OpenAPI Specification"
+    icon="file-code"
+    href="/openapi.json"
+  >
+    Download the complete OpenAPI 3.0 specification for the Arqqin API
+  </Card>
+  
+  <Card
+    title="API Playground"
+    icon="play"
+    href="/api-reference"
+  >
+    Test API endpoints directly in your browser with our interactive playground
+  </Card>
+  
+  <Card
+    title="SDK Examples"
+    icon="code"
+    href="/guides/integration-examples"
+  >
+    View code examples and integration guides for popular programming languages
+  </Card>
+</CardGroup>
+
+## Postman Collection
+
+Our Postman collection includes:
+
+- **All API endpoints** with proper authentication
+- **Pre-configured environments** for staging and production
+- **Example requests** with sample data
+- **Response examples** for all endpoints
+- **Environment variables** for easy configuration
+
+### Quick Setup
+
+1. **Download the collection** using the link above
+2. **Import into Postman** by clicking "Import" and selecting the downloaded file
+3. **Set up environment variables**:
+   - `base_url`: `https://apistg.arqq.in/api` (staging) or `https://api.arqq.in/api` (production)
+   - `api_key`: Your API key from the dashboard
+4. **Start testing** - all requests are pre-configured with authentication
+
+### Environment Variables
+
+The collection uses the following environment variables:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `base_url` | API base URL | `https://apistg.arqq.in/api` |
+| `api_key` | Your API key | `ak_1234567890abcdef` |
+| `company_id` | Your company ID | `k17abc123def456ghi789` |
+| `location_id` | Location ID for testing | `k17xyz789abc123def456` |
+
+## OpenAPI Specification
+
+The complete OpenAPI 3.0 specification is available at `/openapi.json`. This specification includes:
+
+- Complete API schema definitions
+- Request/response examples
+- Authentication requirements
+- Error response formats
+- Data validation rules
+
+You can use this specification to:
+- Generate client SDKs
+- Set up API mocking
+- Validate API responses
+- Create custom documentation
+
+## API Playground
+
+Use our interactive API playground to:
+- Test endpoints without external tools
+- View real-time request/response data
+- Experiment with different parameters
+- Learn the API structure
+
+Access the playground from the [API Reference](/api-reference) page.
+
+## Need Help?
+
+If you need assistance with any of these tools or have questions about API integration:
+
+- Check our [Integration Examples](/guides/integration-examples)
+- Review the [Error Handling Guide](/guides/error-handling)
+- Contact support at [hello@arqqin.com](mailto:hello@arqqin.com)

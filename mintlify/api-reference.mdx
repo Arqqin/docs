@@ -1,0 +1,59 @@
+---
+title: "API Reference"
+description: "Complete API reference for the Arqqin Parking Management Platform"
+---
+
+import { Card, CardGroup, Button } from 'mintlify/components';
+
+# API Reference
+
+Welcome to the Arqqin API reference. This comprehensive guide covers all available endpoints, request/response formats, and authentication methods.
+
+<CardGroup cols={2}>
+  <Card
+    title="Download Postman Collection"
+    icon="download"
+    href="/postman-collection.json"
+  >
+    Import our complete API collection into Postman for easy testing
+  </Card>
+  
+  <Card
+    title="View OpenAPI Spec"
+    icon="file-code"
+    href="/openapi.json"
+  >
+    Download the complete OpenAPI 3.0 specification
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+1. **Get your API key** from the [dashboard](https://dashboard.arqqin.com)
+2. **Set up authentication** using the `X-API-Key` header
+3. **Start with the health check** to verify your connection
+4. **Explore the endpoints** using our interactive playground below
+
+## Authentication
+
+All API requests require authentication using an API key. Include your API key in the `X-API-Key` header:
+
+```bash
+curl -H "X-API-Key: your_api_key_here" \
+     https://apistg.arqq.in/api/health
+```
+
+## Base URLs
+
+- **Staging**: `https://apistg.arqq.in/api`
+- **Production**: `https://api.arqq.in/api`
+
+## Rate Limits
+
+- **Standard**: 1000 requests per hour
+- **Burst**: 100 requests per minute
+- **Headers**: Rate limit information is included in response headers
+
+---
+
+<OpenApiPlayground />

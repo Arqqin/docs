@@ -47,7 +47,7 @@
         "guides/integration-examples"
       ]
     },
-    { "group": "Resources", "pages": ["changelog", "support"] }
+    { "group": "Resources", "pages": ["api-tools", "changelog", "support"] }
   ],
   "footerSocials": {
     "github": "https://github.com/arqqin",
@@ -81,6 +81,14 @@
     "baseUrl": "https://apistg.arqq.in/api/",
     "auth": {
       "method": "bearer"
+    },
+    "playground": {
+      "mode": "show"
+    }
+  },
+  "integrations": {
+    "postman": {
+      "downloadUrl": "/postman-collection.json"
     }
   }
 }
