@@ -85,6 +85,95 @@ result = add_location(location_data)
 ```
 </CodeGroup>
 
+## Listing Locations
+
+### Get All Accessible Locations
+
+Retrieve all locations you have access to:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/locations" \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+```javascript JavaScript
+async function getAllLocations() {
+  const response = await fetch('/api/locations', {
+    headers: { 'X-API-Key': 'YOUR_API_KEY' }
+  });
+  return response.json();
+}
+```
+
+```python Python
+import requests
+
+def get_all_locations():
+    headers = {'X-API-Key': 'YOUR_API_KEY'}
+    response = requests.get('/api/locations', headers=headers)
+    return response.json()
+```
+</CodeGroup>
+
+### Filter Locations by Company
+
+Filter locations to show only those belonging to a specific company:
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://apistg.arqq.in/api/locations?companyId=k17abc123def456ghi789jkl012mno345" \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+```javascript JavaScript
+async function getLocationsByCompany(companyId) {
+  const response = await fetch(`/api/locations?companyId=${companyId}`, {
+    headers: { 'X-API-Key': 'YOUR_API_KEY' }
+  });
+  return response.json();
+}
+
+// Example usage
+const companyId = "k17abc123def456ghi789jkl012mno345";
+const locations = await getLocationsByCompany(companyId);
+```
+
+```python Python
+import requests
+
+def get_locations_by_company(company_id):
+    headers = {'X-API-Key': 'YOUR_API_KEY'}
+    params = {'companyId': company_id}
+    response = requests.get('/api/locations', headers=headers, params=params)
+    return response.json()
+
+# Example usage
+company_id = "k17abc123def456ghi789jkl012mno345"
+locations = get_locations_by_company(company_id)
+```
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "k17xyz789abc123def456ghi012jkl345",
+      "name": "Downtown Residences",
+      "address": "123 Main Street, Dubai",
+      "city": "Dubai",
+      "country": "UAE",
+      "parkingCapacity": 150,
+      "gateCount": 3,
+      "isActive": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    }
+  ]
+}
+```
+
 ## Updating Locations
 
 Update an existing location's information using the API key:

@@ -15,6 +15,21 @@
       "key": "api_key",
       "value": "{{api_key}}",
       "description": "Your API key"
+    },
+    {
+      "key": "company_id",
+      "value": "k17abc123def456ghi789jkl012mno345",
+      "description": "Company ID for filtering locations (example value)"
+    },
+    {
+      "key": "location_id",
+      "value": "k17xyz789abc123def456ghi012jkl345",
+      "description": "Location ID (example value)"
+    },
+    {
+      "key": "whitelist_id",
+      "value": "k17def456ghi789jkl012mno345abc123",
+      "description": "Whitelist vehicle ID (example value)"
     }
   ],
   "auth": {
@@ -105,9 +120,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/locations",
+              "raw": "{{base_url}}/locations?companyId={{company_id}}",
               "host": ["{{base_url}}"],
-              "path": ["locations"]
+              "path": ["locations"],
+              "query": [
+                {
+                  "key": "companyId",
+                  "value": "{{company_id}}",
+                  "description": "Filter locations by company ID. Only locations belonging to the specified company will be returned."
+                }
+              ]
             }
           },
           "response": []

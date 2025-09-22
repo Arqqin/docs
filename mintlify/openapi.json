@@ -119,8 +119,21 @@
       "get": {
         "tags": ["Locations"],
         "summary": "List Locations",
-        "description": "Returns all locations accessible by the API key",
+        "description": "Returns all locations accessible by the API key. Optionally filter by company using the companyId query parameter.",
         "operationId": "listLocations",
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "query",
+            "required": false,
+            "description": "Filter locations by company ID. If provided, only locations belonging to the specified company will be returned. The user must have access to the specified company.",
+            "schema": {
+              "type": "string",
+              "pattern": "^k[a-z0-9]{31}$",
+              "example": "k17abc123def456ghi789jkl012mno345"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of accessible locations",
