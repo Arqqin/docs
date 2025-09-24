@@ -273,40 +273,105 @@ async function getLocationStatus(locationId) {
 
 ### Bulk Location Status
 
-Get status for all company locations:
+Get status across all accessible companies, or filter by a specific company using an optional `companyId` query parameter.
 
 <CodeGroup>
 ```bash cURL
+# All accessible companies (aggregated)
 curl -X GET "https://apistg.arqq.in/api/locations/status" \
+  -H "X-API-Key: YOUR_API_KEY"
+
+# Specific company
+curl -X GET "https://apistg.arqq.in/api/locations/status?companyId=cmp_123" \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
 ```javascript JavaScript
+// All accessible companies
 async function getAllLocationsStatus() {
   const response = await fetch('/api/locations/status', {
     headers: { 'X-API-Key': 'YOUR_API_KEY' }
   });
   return response.json();
 }
+
+// Specific company
+async function getCompanyLocationsStatus(companyId) {
+  const response = await fetch(`/api/locations/status?companyId=${encodeURIComponent(companyId)}`, {
+    headers: { 'X-API-Key': 'YOUR_API_KEY' }
+  });
+  return response.json();
+}
+```
+
+```python Python
+import requests
+
+def get_all_locations_status():
+    return requests.get(
+        'https://apistg.arqq.in/api/locations/status',
+        headers={ 'X-API-Key': 'YOUR_API_KEY' }
+    ).json()
+
+def get_company_locations_status(company_id: str):
+    return requests.get(
+        'https://apistg.arqq.in/api/locations/status',
+        params={ 'companyId': company_id },
+        headers={ 'X-API-Key': 'YOUR_API_KEY' }
+    ).json()
 ```
 </CodeGroup>
 
-**Response:**
+- If `companyId` is provided, your API key must have access to that company; otherwise a 403 is returned.
+- If `companyId` is omitted, results are aggregated across all companies your API key can access.
+
+**Aggregated Response (no companyId):**
 ```json
 {
   "success": true,
   "data": {
-    "companyId": "k17abc123def456ghi789jkl012mno345",
-    "totalLocations": 3,
+    "companies": [
+      { "companyId": "cmp_123", "totalLocations": 3, "lastUpdated": "2025-09-24T12:34:56.000Z" },
+      { "companyId": "cmp_456", "totalLocations": 2, "lastUpdated": "2025-09-24T12:34:56.000Z" }
+    ],
+    "totalLocations": 5,
     "locations": [
       {
-        "locationId": "k17xyz789abc123def456ghi012jkl345",
+        "companyId": "cmp_123",
+        "locationId": "loc_abc",
         "locationName": "Downtown Residences",
         "totalCapacity": 150,
         "currentOccupancy": 89,
         "availableSpaces": 61
       }
-    ]
+      
+    ],
+    "lastUpdated": "2025-09-24T12:34:56.000Z"
+  }
+}
+```
+
+**Filtered Response (with companyId):**
+```json
+{
+  "success": true,
+  "data": {
+    "companies": [
+      { "companyId": "cmp_123", "totalLocations": 3, "lastUpdated": "2025-09-24T12:34:56.000Z" }
+    ],
+    "totalLocations": 3,
+    "locations": [
+      {
+        "companyId": "cmp_123",
+        "locationId": "loc_abc",
+        "locationName": "Downtown Residences",
+        "totalCapacity": 150,
+        "currentOccupancy": 89,
+        "availableSpaces": 61
+      }
+      
+    ],
+    "lastUpdated": "2025-09-24T12:34:56.000Z"
   }
 }
 ```
